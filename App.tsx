@@ -12,38 +12,80 @@ const Header: React.FC<{ setStep: (s: AppState) => void; hasBook: boolean; curre
       </div>
       <h1 className="text-base md:text-lg font-black tracking-tighter text-slate-800 serif-text">AiPen</h1>
     </div>
-    <div className="flex items-center gap-3 md:gap-5">
-      <nav className="hidden md:flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+    <div className="flex items-center gap-4 md:gap-6">
+      <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1.5 rounded-full border border-slate-200/50 backdrop-blur-md shadow-inner">
+        <button 
+          onClick={() => setStep(AppState.HOME)} 
+          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.HOME ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-600 hover:bg-white/50'}`}
+        >
+          New Project
+        </button>
+        <button 
+          onClick={() => setStep(AppState.DEVELOPER)} 
+          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.DEVELOPER ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-600 hover:bg-white/50'}`}
+        >
+          Developer
+        </button>
+        <button 
+          onClick={() => setStep(AppState.ABOUT)} 
+          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.ABOUT ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-600 hover:bg-white/50'}`}
+        >
+          About
+        </button>
         {hasBook && (
           <button 
             onClick={() => setStep(AppState.HISTORY)} 
-            className={`transition-colors hover:text-indigo-600 ${currentStep === AppState.HISTORY ? 'text-indigo-600' : ''}`}
+            className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.HISTORY ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-600 hover:bg-white/50'}`}
           >
             History
           </button>
         )}
-        <button 
-          onClick={() => setStep(AppState.ABOUT)} 
-          className={`transition-colors hover:text-indigo-600 ${currentStep === AppState.ABOUT ? 'text-indigo-600' : ''}`}
-        >
-          About
-        </button>
-        <button 
-          onClick={() => setStep(AppState.DEVELOPER)} 
-          className={`transition-colors hover:text-indigo-600 ${currentStep === AppState.DEVELOPER ? 'text-indigo-600' : ''}`}
-        >
-          Developer
-        </button>
       </nav>
-      <button 
-        onClick={() => setStep(AppState.HOME)} 
-        className="bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition-all shadow-md font-black text-[9px] md:text-[10px] uppercase tracking-wider"
-      >
-        New Project
-      </button>
+      {hasBook && currentStep !== AppState.VIEWER && (
+        <button 
+          onClick={() => setStep(AppState.VIEWER)} 
+          className="bg-indigo-600 text-white px-5 py-2.5 rounded-full hover:bg-indigo-700 transition-all shadow-md font-black text-[9px] md:text-[10px] uppercase tracking-wider ml-2"
+        >
+          View Book
+        </button>
+      )}
     </div>
   </header>
 );
+
+const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc: string, b64: string) => void}> = ({desc, genre, onReplace}) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generate = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+          const imgB64 = await geminiService.generateChapterImage(desc, genre);
+          onReplace(desc, imgB64);
+      } catch (e) {
+          setError("Failed to generate illustration.");
+          setLoading(false);
+      }
+  }
+
+  return (
+      <div className="my-10 p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[32px] text-center no-print">
+          <i className="fas fa-sparkles text-indigo-500 text-3xl mb-3"></i>
+          <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Illustration Concept</div>
+          <p className="text-sm text-slate-600 italic font-medium max-w-lg mx-auto mb-6">"{desc}"</p>
+          
+          <button 
+              onClick={generate}
+              disabled={loading}
+              className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg disabled:opacity-50 inline-flex items-center gap-2"
+          >
+              {loading ? <><i className="fas fa-spinner fa-spin"></i> Generating Image...</> : <><i className="fas fa-image"></i> Generate AI Image</>}
+          </button>
+          {error && <div className="text-red-500 text-xs mt-3 font-bold"><i className="fas fa-triangle-exclamation mr-1"></i> {error}</div>}
+      </div>
+  )
+}
 
 const App: React.FC = () => {
   const [step, setStep] = useState<AppState>(AppState.HOME);
@@ -140,22 +182,35 @@ const App: React.FC = () => {
     }
   };
 
+  const handleReplaceVisual = (desc: string, base64: string, chapterIndex: number) => {
+    setCurrentBook(prev => {
+      if (!prev) return prev;
+      const updatedBook = { ...prev };
+      updatedBook.outline = [...prev.outline];
+      const chapter = { ...updatedBook.outline[chapterIndex] };
+      
+      const regex = new RegExp(`\\[VISUAL:\\s*${desc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\]`);
+      const imageHtml = `\n\n<div class="my-12 text-center break-inside-avoid"><img src="${base64}" alt="${desc}" class="rounded-[32px] shadow-2xl mx-auto w-full max-w-3xl border border-slate-100" /></div>\n\n`;
+      
+      chapter.content = (chapter.content || '').replace(regex, imageHtml);
+      updatedBook.outline[chapterIndex] = chapter;
+      
+      updatedBook.history = [
+        ...prev.history, 
+        { 
+          timestamp: new Date().toLocaleTimeString(), 
+          event: `Inserted AI generated illustration into Chapter ${chapterIndex + 1}.`, 
+          version: prev.history.length + 1 
+        }
+      ];
+      
+      return updatedBook;
+    });
+  };
+
   const totalWords = useMemo(() => {
     return currentBook?.outline.reduce((sum, ch) => sum + (ch.wordCount || 0), 0) || 0;
   }, [currentBook]);
-
-  const renderedActiveChapter = useMemo(() => {
-    if (!currentBook || !currentBook.outline[activeChapterIndex]?.content) return '';
-    const content = currentBook.outline[activeChapterIndex].content || '';
-    const cleanedContent = content.replace(/\[VISUAL: (.*?)\]/g, (match, desc) => {
-      return `<div class="my-10 p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[32px] text-center no-print">
-        <i class="fas fa-sparkles text-indigo-500 text-3xl mb-3"></i>
-        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Illustration Concept</div>
-        <p class="text-sm text-slate-600 italic font-medium max-w-lg mx-auto">${desc}</p>
-      </div>`;
-    });
-    return marked.parse(cleanedContent);
-  }, [currentBook, activeChapterIndex]);
 
   const downloadPDF = () => { window.print(); };
 
@@ -174,8 +229,8 @@ const App: React.FC = () => {
 
         {/* Home Screen */}
         {step === AppState.HOME && (
-          <div className="w-full grid md:grid-cols-2 gap-12 md:gap-20 items-center mt-2 md:mt-12 animate-in fade-in duration-700">
-            <div className="space-y-8 md:space-y-10 text-center md:text-left order-2 md:order-1">
+          <div className="w-full grid md:grid-cols-2 gap-12 md:gap-16 items-stretch mt-2 md:mt-8 animate-in fade-in duration-700">
+            <div className="space-y-8 md:space-y-10 text-center md:text-left order-2 md:order-1 flex flex-col">
               <div>
                 <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-[9px] font-black rounded-full mb-4 uppercase tracking-[0.2em]">Professional Suite</span>
                 <h2 className="text-4xl md:text-7xl font-black leading-tight text-slate-900 serif-text tracking-tight">
@@ -186,7 +241,7 @@ const App: React.FC = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 md:p-10 rounded-[40px] shadow-2xl border border-slate-100 space-y-6 text-left">
+              <div className="bg-white p-6 md:p-10 rounded-[40px] shadow-2xl border border-slate-100 space-y-6 text-left relative z-20 mt-auto">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Manuscript Title</label>
                   <div className="relative">
@@ -224,18 +279,23 @@ const App: React.FC = () => {
                 </button>
               </div>
             </div>
-            <div className="order-1 md:order-2 relative flex justify-center">
-              <div className="absolute -inset-8 bg-indigo-500/10 blur-3xl rounded-full"></div>
-              <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1000&auto=format&fit=crop" className="w-full max-w-[420px] rounded-[40px] shadow-2xl rotate-2 relative z-10 hover:rotate-0 transition-transform duration-700 border-8 border-white" alt="Creative Writing Books" />
+            
+            <div className="order-1 md:order-2 relative flex justify-center md:justify-end items-end w-full h-full pb-2 md:pb-6">
+              <div className="absolute bottom-10 right-0 w-full max-w-[400px] h-[500px] bg-indigo-500/10 blur-3xl rounded-full pointer-events-none"></div>
+              <img 
+                src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800" 
+                className="w-full max-w-[280px] md:max-w-[340px] aspect-[9/16] object-cover rounded-[40px] shadow-2xl rotate-3 relative z-10 hover:rotate-0 transition-transform duration-700 border-8 border-white ml-auto mr-auto md:mr-0" 
+                alt="Creative Writing Studio" 
+              />
             </div>
           </div>
         )}
 
-        {/* Developer Page - Refined Alignment */}
+        {/* Developer Page */}
         {step === AppState.DEVELOPER && (
           <div className="w-full max-w-5xl py-4 md:py-12 animate-in zoom-in-95 duration-500">
             <div className="bg-slate-900 text-white rounded-[40px] md:rounded-[60px] p-8 md:p-20 relative overflow-hidden shadow-2xl flex flex-col md:flex-row gap-10 md:gap-16 items-center md:items-start">
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] -mr-40 -mt-40"></div>
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] -mr-40 -mt-40 pointer-events-none"></div>
               
               <div className="w-48 h-48 md:w-80 md:h-80 flex-shrink-0 relative">
                 <div className="absolute inset-0 border-4 border-indigo-500/30 rounded-[40px] rotate-6"></div>
@@ -246,22 +306,21 @@ const App: React.FC = () => {
                 />
               </div>
 
-              <div className="relative z-10 space-y-6 md:space-y-8 flex-1 text-center md:text-left flex flex-col items-center md:items-start">
-                <div className="space-y-3">
+              <div className="relative z-10 space-y-6 md:space-y-8 flex-1 w-full text-center md:text-left flex flex-col items-center md:items-start">
+                <div className="space-y-3 flex flex-col items-center md:items-start w-full">
                   <h2 className="text-3xl md:text-6xl font-black serif-text leading-tight whitespace-nowrap tracking-tight">Sayed Mohsin Ali</h2>
-                  <div className="flex items-center justify-center md:justify-start gap-3">
+                  <div className="flex items-center justify-center md:justify-start gap-3 w-full">
                     <span className="text-indigo-400 font-bold tracking-[0.2em] uppercase text-[8px] md:text-[10px] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 whitespace-nowrap">Systems Developer</span>
                     <div className="w-1 h-1 rounded-full bg-slate-700"></div>
                     <span className="text-indigo-400 font-bold tracking-[0.2em] uppercase text-[8px] md:text-[10px] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 whitespace-nowrap">AI Architect</span>
                   </div>
                 </div>
 
-                <p className="text-sm md:text-xl text-slate-400 font-light leading-relaxed serif-text max-w-2xl mx-auto md:mx-0">
+                <p className="text-sm md:text-xl text-slate-400 font-light leading-relaxed serif-text max-w-2xl mx-auto md:mx-0 w-full">
                   Engineering the architecture of <span className="text-white font-medium italic underline decoration-indigo-500/50 underline-offset-4">Elite Digital Systems</span>. Dedicated to fusing raw computational power with premium aesthetic vision for the next generation of creative technology.
                 </p>
 
-                {/* Left aligned tags */}
-                <div className="flex flex-wrap gap-2 md:gap-3 justify-center md:justify-start pt-2">
+                <div className="flex flex-wrap gap-2 md:gap-3 justify-center md:justify-start pt-2 w-full">
                   {['NextJS Pro', 'TypeScript', 'AI Logic', 'UI Mastery'].map(skill => (
                     <div key={skill} className="bg-white/5 border border-white/10 px-4 py-2 rounded-2xl text-center text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-300">
                       {skill}
@@ -269,8 +328,7 @@ const App: React.FC = () => {
                   ))}
                 </div>
 
-                {/* Left aligned social icons */}
-                <div className="flex gap-8 pt-4 justify-center md:justify-start">
+                <div className="flex gap-6 pt-4 justify-center md:justify-start w-full">
                   <a href="#" className="text-xl md:text-2xl text-slate-500 hover:text-white transition-all transform hover:-translate-y-1"><i className="fab fa-github"></i></a>
                   <a href="#" className="text-xl md:text-2xl text-slate-500 hover:text-white transition-all transform hover:-translate-y-1"><i className="fab fa-linkedin"></i></a>
                   <a href="#" className="text-xl md:text-2xl text-slate-500 hover:text-white transition-all transform hover:-translate-y-1"><i className="fab fa-youtube"></i></a>
@@ -281,11 +339,11 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* About Page - High-End Style */}
+        {/* About Page */}
         {step === AppState.ABOUT && (
           <div className="w-full max-w-5xl py-4 md:py-12 animate-in fade-in duration-500">
             <div className="bg-slate-900 text-white rounded-[40px] md:rounded-[60px] p-8 md:p-20 relative overflow-hidden shadow-2xl flex flex-col gap-10 items-center">
-               <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] -ml-40 -mb-40"></div>
+               <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] -ml-40 -mb-40 pointer-events-none"></div>
                
                <div className="relative z-10 text-center space-y-6 md:space-y-8 max-w-3xl">
                   <h2 className="text-4xl md:text-6xl font-black serif-text leading-tight">Elite Publishing <span className="text-indigo-400 italic">Studio.</span></h2>
@@ -386,7 +444,7 @@ const App: React.FC = () => {
                </div>
 
                <div className="book-page p-8 md:p-24 relative overflow-hidden flex flex-col rounded-[40px] min-h-[90vh]">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 opacity-50 pointer-events-none"></div>
                   
                   <div className="flex-1 prose prose-slate max-w-none serif-text">
                     {activeChapterIndex === 0 && (
@@ -405,8 +463,20 @@ const App: React.FC = () => {
                        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">{(currentBook.outline[activeChapterIndex].wordCount || 0).toLocaleString()} Words</span>
                     </div>
 
-                    <div className="chapter-body text-lg md:text-xl text-slate-700 leading-[1.8]" 
-                      dangerouslySetInnerHTML={{ __html: renderedActiveChapter }}></div>
+                    <div className="chapter-body text-lg md:text-xl text-slate-700 leading-[1.8]">
+                      {(currentBook.outline[activeChapterIndex].content || '').split(/\[VISUAL:\s*(.*?)\s*\]/g).map((part, i) => {
+                        if (i % 2 === 0) {
+                          return <div key={i} dangerouslySetInnerHTML={{ __html: marked.parse(part) as string }} />;
+                        } else {
+                          return <VisualPlaceholder 
+                            key={i} 
+                            desc={part} 
+                            genre={currentBook.genre} 
+                            onReplace={(desc, b64) => handleReplaceVisual(desc, b64, activeChapterIndex)} 
+                          />;
+                        }
+                      })}
+                    </div>
                   </div>
 
                   <div className="mt-20 pt-10 border-t border-slate-50 flex justify-between items-center text-slate-300 font-serif text-[11px] italic">
@@ -464,7 +534,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <footer className="bg-white py-8 px-8 no-print mt-auto border-t border-slate-100">
+      <footer className="bg-white py-8 px-8 no-print mt-auto border-t border-slate-100 relative z-30">
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2 opacity-50 grayscale hover:grayscale-0 transition-all">
                <div className="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center text-white">
@@ -473,7 +543,7 @@ const App: React.FC = () => {
                <span className="font-black text-slate-900 serif-text text-sm">AiPen Studio</span>
             </div>
             
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-70 text-center">
+            <div className="text-[7px] md:text-[8px] font-light text-slate-400 uppercase tracking-[0.3em] opacity-40 text-center">
                © 2026 AiPen Studio. All Rights Reserved. SMA
             </div>
 
@@ -497,7 +567,8 @@ const App: React.FC = () => {
                  </div>
                )}
                <h2 className="text-3xl font-bold mb-8 border-b pb-4">Chapter {i + 1}: {ch.title}</h2>
-               <div dangerouslySetInnerHTML={{ __html: marked.parse(ch.content || '') }}></div>
+               {/* Print parsing avoids showing interactive buttons */}
+               <div dangerouslySetInnerHTML={{ __html: marked.parse((ch.content || '').replace(/\[VISUAL:\s*(.*?)\s*\]/g, '')) as string }}></div>
             </div>
             <div className="text-center mt-auto pt-10 text-slate-300 font-serif italic border-t">Page {i + 1}</div>
           </div>

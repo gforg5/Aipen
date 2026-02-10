@@ -61,6 +61,27 @@ export const geminiService = {
     return response.text;
   },
 
+  async generateChapterImage(desc: string, genre: string): Promise<string> {
+    const prompt = `A professional book illustration for a ${genre} book. Concept: ${desc}. Visual style: highly aesthetic, cohesive, clean. No text on image. High resolution.`;
+    
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: { parts: [{ text: prompt }] },
+      config: {
+        imageConfig: {
+          aspectRatio: "16:9"
+        }
+      }
+    });
+
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
+    throw new Error("Failed to generate image.");
+  },
+
   async generateCovers(title: string, genre: string): Promise<string[]> {
     const styles = [
       "Minimalist and modern",
