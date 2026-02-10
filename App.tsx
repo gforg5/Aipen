@@ -7,35 +7,35 @@ import { marked } from 'marked';
 const Header: React.FC<{ setStep: (s: AppState) => void; hasBook: boolean; currentStep: AppState }> = ({ setStep, hasBook, currentStep }) => (
   <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 py-3 px-4 md:px-8 flex justify-between items-center no-print">
     <div className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105" onClick={() => setStep(AppState.HOME)}>
-      <div className="w-8 h-8 md:w-9 md:h-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-indigo-100 shadow-lg">
+      <div className="w-8 h-8 md:w-9 md:h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-blue-200 shadow-lg">
         <i className="fas fa-pen-nib text-sm md:text-base"></i>
       </div>
       <h1 className="text-base md:text-lg font-black tracking-tighter text-slate-800 serif-text">AiPen</h1>
     </div>
     <div className="flex items-center gap-4 md:gap-6">
-      <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1.5 rounded-full border border-slate-200/50 backdrop-blur-md shadow-inner">
+      <nav className="hidden md:flex items-center gap-2">
         <button 
           onClick={() => setStep(AppState.HOME)} 
-          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.HOME ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-600 hover:bg-white/50'}`}
+          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] bg-blue-600 text-white hover:bg-blue-700 shadow-md ${currentStep === AppState.HOME ? 'ring-4 ring-blue-300/50' : ''}`}
         >
           New Project
         </button>
         <button 
           onClick={() => setStep(AppState.DEVELOPER)} 
-          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.DEVELOPER ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-600 hover:bg-white/50'}`}
+          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.DEVELOPER ? 'bg-blue-50 text-blue-600' : 'text-slate-500 bg-transparent'} hover:bg-blue-600 hover:text-white hover:shadow-md`}
         >
           Developer
         </button>
         <button 
           onClick={() => setStep(AppState.ABOUT)} 
-          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.ABOUT ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-600 hover:bg-white/50'}`}
+          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.ABOUT ? 'bg-blue-50 text-blue-600' : 'text-slate-500 bg-transparent'} hover:bg-blue-600 hover:text-white hover:shadow-md`}
         >
           About
         </button>
         {hasBook && (
           <button 
             onClick={() => setStep(AppState.HISTORY)} 
-            className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.HISTORY ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-600 hover:bg-white/50'}`}
+            className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.HISTORY ? 'bg-blue-50 text-blue-600' : 'text-slate-500 bg-transparent'} hover:bg-blue-600 hover:text-white hover:shadow-md`}
           >
             History
           </button>
@@ -44,7 +44,7 @@ const Header: React.FC<{ setStep: (s: AppState) => void; hasBook: boolean; curre
       {hasBook && currentStep !== AppState.VIEWER && (
         <button 
           onClick={() => setStep(AppState.VIEWER)} 
-          className="bg-indigo-600 text-white px-5 py-2.5 rounded-full hover:bg-indigo-700 transition-all shadow-md font-black text-[9px] md:text-[10px] uppercase tracking-wider ml-2"
+          className="bg-slate-900 text-white px-5 py-2.5 rounded-full hover:bg-slate-800 transition-all shadow-md font-black text-[9px] md:text-[10px] uppercase tracking-wider ml-2"
         >
           View Book
         </button>
@@ -71,14 +71,14 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
 
   return (
       <div className="my-10 p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[32px] text-center no-print">
-          <i className="fas fa-sparkles text-indigo-500 text-3xl mb-3"></i>
+          <i className="fas fa-sparkles text-blue-500 text-3xl mb-3"></i>
           <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Illustration Concept</div>
           <p className="text-sm text-slate-600 italic font-medium max-w-lg mx-auto mb-6">"{desc}"</p>
           
           <button 
               onClick={generate}
               disabled={loading}
-              className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg disabled:opacity-50 inline-flex items-center gap-2"
+              className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg disabled:opacity-50 inline-flex items-center gap-2"
           >
               {loading ? <><i className="fas fa-spinner fa-spin"></i> Generating Image...</> : <><i className="fas fa-image"></i> Generate AI Image</>}
           </button>
@@ -232,9 +232,9 @@ const App: React.FC = () => {
           <div className="w-full grid md:grid-cols-2 gap-12 md:gap-16 items-stretch mt-2 md:mt-8 animate-in fade-in duration-700">
             <div className="space-y-8 md:space-y-10 text-center md:text-left order-2 md:order-1 flex flex-col">
               <div>
-                <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-[9px] font-black rounded-full mb-4 uppercase tracking-[0.2em]">Professional Suite</span>
+                <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-[9px] font-black rounded-full mb-4 uppercase tracking-[0.2em]">Professional Suite</span>
                 <h2 className="text-4xl md:text-7xl font-black leading-tight text-slate-900 serif-text tracking-tight">
-                  Write Your Book <br className="hidden md:block"/><span className="text-indigo-600 italic">with AiPen.</span>
+                  Write Your Book <br className="hidden md:block"/><span className="text-blue-600 italic">with AiPen.</span>
                 </h2>
                 <p className="mt-6 text-sm md:text-lg text-slate-500 leading-relaxed max-w-md mx-auto md:mx-0">
                   Professional manuscripts from 50 to 500 pages. We handle the outline, content, and covers. You handle the vision.
@@ -247,7 +247,7 @@ const App: React.FC = () => {
                   <div className="relative">
                     <i className="fas fa-book-open absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
                     <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="The Silence of Stars"
-                      className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-slate-200" />
+                      className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-slate-200" />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -255,13 +255,13 @@ const App: React.FC = () => {
                   <div className="relative">
                     <i className="fas fa-user-pen absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
                     <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Published by SMA"
-                      className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-slate-200" />
+                      className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-slate-200" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Genre</label>
-                    <select value={genre} onChange={(e) => setGenre(e.target.value)} className="w-full px-4 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:ring-4 focus:ring-indigo-50 outline-none appearance-none">
+                    <select value={genre} onChange={(e) => setGenre(e.target.value)} className="w-full px-4 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:ring-4 focus:ring-blue-50 outline-none appearance-none">
                       <option>Business/Self-Help</option>
                       <option>Science Fiction</option>
                       <option>Mystery/Thriller</option>
@@ -270,7 +270,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Target Pages</label>
-                    <input type="number" min="50" max="500" value={length} onChange={(e) => setLength(parseInt(e.target.value))} className="w-full px-4 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:ring-4 focus:ring-indigo-50 outline-none" />
+                    <input type="number" min="50" max="500" value={length} onChange={(e) => setLength(parseInt(e.target.value))} className="w-full px-4 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:ring-4 focus:ring-blue-50 outline-none" />
                   </div>
                 </div>
                 <button onClick={startOutline} disabled={loading} className="w-full py-5 bg-slate-900 text-white rounded-3xl font-black hover:bg-slate-800 hover:shadow-2xl hover:-translate-y-0.5 transition-all shadow-xl disabled:bg-slate-300 uppercase text-xs tracking-widest">
@@ -281,7 +281,7 @@ const App: React.FC = () => {
             </div>
             
             <div className="order-1 md:order-2 relative flex justify-center md:justify-end items-end w-full h-full pb-2 md:pb-6">
-              <div className="absolute bottom-10 right-0 w-full max-w-[400px] h-[500px] bg-indigo-500/10 blur-3xl rounded-full pointer-events-none"></div>
+              <div className="absolute bottom-10 right-0 w-full max-w-[400px] h-[500px] bg-blue-500/10 blur-3xl rounded-full pointer-events-none"></div>
               <img 
                 src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800" 
                 className="w-full max-w-[280px] md:max-w-[340px] aspect-[9/16] object-cover rounded-[40px] shadow-2xl rotate-3 relative z-10 hover:rotate-0 transition-transform duration-700 border-8 border-white ml-auto mr-auto md:mr-0" 
@@ -295,10 +295,10 @@ const App: React.FC = () => {
         {step === AppState.DEVELOPER && (
           <div className="w-full max-w-5xl py-4 md:py-12 animate-in zoom-in-95 duration-500">
             <div className="bg-slate-900 text-white rounded-[40px] md:rounded-[60px] p-8 md:p-20 relative overflow-hidden shadow-2xl flex flex-col md:flex-row gap-10 md:gap-16 items-center md:items-start">
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] -mr-40 -mt-40 pointer-events-none"></div>
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -mr-40 -mt-40 pointer-events-none"></div>
               
               <div className="w-48 h-48 md:w-80 md:h-80 flex-shrink-0 relative">
-                <div className="absolute inset-0 border-4 border-indigo-500/30 rounded-[40px] rotate-6"></div>
+                <div className="absolute inset-0 border-4 border-blue-500/30 rounded-[40px] rotate-6"></div>
                 <img 
                   src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" 
                   alt="Sayed Mohsin Ali" 
@@ -310,14 +310,14 @@ const App: React.FC = () => {
                 <div className="space-y-3 flex flex-col items-center md:items-start w-full">
                   <h2 className="text-3xl md:text-6xl font-black serif-text leading-tight whitespace-nowrap tracking-tight">Sayed Mohsin Ali</h2>
                   <div className="flex items-center justify-center md:justify-start gap-3 w-full">
-                    <span className="text-indigo-400 font-bold tracking-[0.2em] uppercase text-[8px] md:text-[10px] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 whitespace-nowrap">Systems Developer</span>
+                    <span className="text-blue-400 font-bold tracking-[0.2em] uppercase text-[8px] md:text-[10px] bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 whitespace-nowrap">Systems Developer</span>
                     <div className="w-1 h-1 rounded-full bg-slate-700"></div>
-                    <span className="text-indigo-400 font-bold tracking-[0.2em] uppercase text-[8px] md:text-[10px] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 whitespace-nowrap">AI Architect</span>
+                    <span className="text-blue-400 font-bold tracking-[0.2em] uppercase text-[8px] md:text-[10px] bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 whitespace-nowrap">AI Architect</span>
                   </div>
                 </div>
 
                 <p className="text-sm md:text-xl text-slate-400 font-light leading-relaxed serif-text max-w-2xl mx-auto md:mx-0 w-full">
-                  Engineering the architecture of <span className="text-white font-medium italic underline decoration-indigo-500/50 underline-offset-4">Elite Digital Systems</span>. Dedicated to fusing raw computational power with premium aesthetic vision for the next generation of creative technology.
+                  Engineering the architecture of <span className="text-white font-medium italic underline decoration-blue-500/50 underline-offset-4">Elite Digital Systems</span>. Dedicated to fusing raw computational power with premium aesthetic vision for the next generation of creative technology.
                 </p>
 
                 <div className="flex flex-wrap gap-2 md:gap-3 justify-center md:justify-start pt-2 w-full">
@@ -343,22 +343,22 @@ const App: React.FC = () => {
         {step === AppState.ABOUT && (
           <div className="w-full max-w-5xl py-4 md:py-12 animate-in fade-in duration-500">
             <div className="bg-slate-900 text-white rounded-[40px] md:rounded-[60px] p-8 md:p-20 relative overflow-hidden shadow-2xl flex flex-col gap-10 items-center">
-               <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] -ml-40 -mb-40 pointer-events-none"></div>
+               <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -ml-40 -mb-40 pointer-events-none"></div>
                
                <div className="relative z-10 text-center space-y-6 md:space-y-8 max-w-3xl">
-                  <h2 className="text-4xl md:text-6xl font-black serif-text leading-tight">Elite Publishing <span className="text-indigo-400 italic">Studio.</span></h2>
-                  <div className="w-20 h-1.5 bg-indigo-600 mx-auto rounded-full shadow-lg shadow-indigo-500/50"></div>
+                  <h2 className="text-4xl md:text-6xl font-black serif-text leading-tight">Elite Publishing <span className="text-blue-400 italic">Studio.</span></h2>
+                  <div className="w-20 h-1.5 bg-blue-600 mx-auto rounded-full shadow-lg shadow-blue-500/50"></div>
                   
                   <div className="text-sm md:text-lg text-slate-400 leading-relaxed space-y-6 serif-text text-left">
                     <p>AiPen is a premium manuscript engineering suite designed for professional publishers and independent authors. It leverages elite LLM architectures to transform a simple title into a structured, deep, and formatted book ready for publication.</p>
                     <div className="grid md:grid-cols-2 gap-4 md:gap-6 not-prose py-4">
                        <div className="p-6 md:p-8 bg-white/5 border border-white/10 rounded-[32px] hover:bg-white/10 transition-colors">
-                          <i className="fas fa-wand-sparkles text-indigo-500 text-3xl mb-4"></i>
+                          <i className="fas fa-wand-sparkles text-blue-500 text-3xl mb-4"></i>
                           <h4 className="font-black text-white text-xs md:text-sm uppercase tracking-widest mb-2">Neural Drafting</h4>
                           <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed">High-context intelligence ensures narrative consistency across 500+ page manuscripts.</p>
                        </div>
                        <div className="p-6 md:p-8 bg-white/5 border border-white/10 rounded-[32px] hover:bg-white/10 transition-colors">
-                          <i className="fas fa-puzzle-piece text-indigo-500 text-3xl mb-4"></i>
+                          <i className="fas fa-puzzle-piece text-blue-500 text-3xl mb-4"></i>
                           <h4 className="font-black text-white text-xs md:text-sm uppercase tracking-widest mb-2">Architectural Logic</h4>
                           <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed">Systematic outlining and sub-topic mapping prevents writer's block instantly.</p>
                        </div>
@@ -379,15 +379,15 @@ const App: React.FC = () => {
              <div className="bg-white p-8 md:p-16 rounded-[40px] shadow-2xl border border-slate-100 space-y-12">
                 <div className="flex justify-between items-center">
                    <h2 className="text-2xl md:text-4xl font-black serif-text">Project Timeline</h2>
-                   <button onClick={() => setStep(AppState.VIEWER)} className="text-indigo-600 font-black text-xs uppercase tracking-widest hover:underline">Viewer <i className="fas fa-chevron-right ml-1"></i></button>
+                   <button onClick={() => setStep(AppState.VIEWER)} className="text-blue-600 font-black text-xs uppercase tracking-widest hover:underline">Viewer <i className="fas fa-chevron-right ml-1"></i></button>
                 </div>
                 <div className="space-y-8">
                    {currentBook.history.slice().reverse().map((ev, i) => (
                      <div key={i} className="flex gap-6 border-l-2 border-slate-100 pl-8 pb-10 relative last:pb-0">
-                        <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-indigo-600 shadow-lg shadow-indigo-100"></div>
+                        <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-600 shadow-lg shadow-blue-100"></div>
                         <div className="flex-1 bg-slate-50 p-6 rounded-3xl border border-slate-100 transition-transform hover:translate-x-1">
                            <div className="flex justify-between items-start mb-2">
-                              <span className="font-black text-slate-900 tracking-tight uppercase text-[9px] md:text-[10px] text-indigo-600">Snapshot {ev.version}</span>
+                              <span className="font-black text-slate-900 tracking-tight uppercase text-[9px] md:text-[10px] text-blue-600">Snapshot {ev.version}</span>
                               <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">{ev.timestamp}</span>
                            </div>
                            <p className="text-slate-600 text-xs md:text-sm leading-relaxed font-medium italic">"{ev.event}"</p>
@@ -408,14 +408,14 @@ const App: React.FC = () => {
                <button 
                 disabled={activeChapterIndex === 0}
                 onClick={() => setActiveChapterIndex(p => p - 1)}
-                className="w-16 h-16 bg-white border border-slate-100 shadow-2xl rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all disabled:opacity-0"
+                className="w-16 h-16 bg-white border border-slate-100 shadow-2xl rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:scale-110 transition-all disabled:opacity-0"
                >
                  <i className="fas fa-chevron-left text-xl"></i>
                </button>
                <button 
                 disabled={activeChapterIndex === currentBook.outline.length - 1}
                 onClick={() => setActiveChapterIndex(p => p + 1)}
-                className="w-16 h-16 bg-indigo-600 shadow-2xl rounded-full flex items-center justify-center text-white hover:scale-110 transition-all disabled:opacity-0"
+                className="w-16 h-16 bg-blue-600 shadow-2xl rounded-full flex items-center justify-center text-white hover:scale-110 transition-all disabled:opacity-0"
                >
                  <i className="fas fa-chevron-right text-xl"></i>
                </button>
@@ -438,7 +438,7 @@ const App: React.FC = () => {
                       <i className="fas fa-list mr-2"></i> History
                     </button>
                     <button onClick={downloadPDF} className="flex-1 md:flex-none bg-slate-900 text-white px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-lg text-xs uppercase">
-                      <i className="fas fa-file-pdf text-indigo-400"></i> Save PDF
+                      <i className="fas fa-file-pdf text-blue-400"></i> Save PDF
                     </button>
                  </div>
                </div>
@@ -449,7 +449,7 @@ const App: React.FC = () => {
                   <div className="flex-1 prose prose-slate max-w-none serif-text">
                     {activeChapterIndex === 0 && (
                       <div className="mb-24 text-center border-b-2 border-slate-100 pb-20 space-y-8">
-                         <div className="text-[10px] font-black tracking-[0.4em] uppercase text-indigo-600 mb-2">Original Manuscript</div>
+                         <div className="text-[10px] font-black tracking-[0.4em] uppercase text-blue-600 mb-2">Original Manuscript</div>
                          <h1 className="text-5xl md:text-8xl font-black text-slate-900 leading-none">{currentBook.title}</h1>
                          <div className="text-xl md:text-3xl text-slate-400 italic font-serif">By Author: {currentBook.author}</div>
                          <div className="pt-10 text-[9px] font-bold text-slate-300 uppercase tracking-widest flex items-center justify-center gap-2">
@@ -459,7 +459,7 @@ const App: React.FC = () => {
                     )}
 
                     <div className="chapter-header mb-12 flex justify-between items-center no-print border-b border-slate-100 pb-4">
-                       <h2 className="text-2xl font-black text-indigo-600 uppercase tracking-tighter">Chapter {activeChapterIndex + 1}</h2>
+                       <h2 className="text-2xl font-black text-blue-600 uppercase tracking-tighter">Chapter {activeChapterIndex + 1}</h2>
                        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">{(currentBook.outline[activeChapterIndex].wordCount || 0).toLocaleString()} Words</span>
                     </div>
 
@@ -492,7 +492,7 @@ const App: React.FC = () => {
                   <i className="fas fa-chevron-left text-lg"></i>
                 </button>
                 <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Page {activeChapterIndex + 1}</div>
-                <button disabled={activeChapterIndex === currentBook.outline.length - 1} onClick={() => setActiveChapterIndex(p => p + 1)} className="w-12 h-12 bg-indigo-600 shadow-lg rounded-full flex items-center justify-center text-white disabled:opacity-30">
+                <button disabled={activeChapterIndex === currentBook.outline.length - 1} onClick={() => setActiveChapterIndex(p => p + 1)} className="w-12 h-12 bg-blue-600 shadow-lg rounded-full flex items-center justify-center text-white disabled:opacity-30">
                   <i className="fas fa-chevron-right text-lg"></i>
                 </button>
             </div>
@@ -504,10 +504,10 @@ const App: React.FC = () => {
           <div className="py-12 md:py-20 text-center animate-in fade-in duration-500 max-w-4xl w-full flex flex-col items-center">
              {step === AppState.WRITING ? (
                <div className="space-y-12">
-                  <div className="w-32 h-32 border-8 border-slate-100 border-t-indigo-600 rounded-full animate-spin mx-auto shadow-2xl"></div>
+                  <div className="w-32 h-32 border-8 border-slate-100 border-t-blue-600 rounded-full animate-spin mx-auto shadow-2xl"></div>
                   <div className="space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black serif-text">Constructing Masterpiece...</h2>
-                    <div className="w-16 h-1.5 bg-indigo-600 mx-auto rounded-full mb-4"></div>
+                    <div className="w-16 h-1.5 bg-blue-600 mx-auto rounded-full mb-4"></div>
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] md:text-[10px]">{progress.message}</p>
                   </div>
                </div>
@@ -525,7 +525,7 @@ const App: React.FC = () => {
                        </div>
                      ))}
                   </div>
-                  <button onClick={startWriting} className="w-full max-w-md py-5 bg-indigo-600 text-white rounded-[24px] font-black shadow-2xl hover:-translate-y-1 transition-transform uppercase text-xs tracking-widest">
+                  <button onClick={startWriting} className="w-full max-w-md py-5 bg-blue-600 text-white rounded-[24px] font-black shadow-2xl hover:-translate-y-1 transition-transform uppercase text-xs tracking-widest">
                     Confirm & Build Manuscript
                   </button>
                </div>
@@ -537,7 +537,7 @@ const App: React.FC = () => {
       <footer className="bg-white py-8 px-8 no-print mt-auto border-t border-slate-100 relative z-30">
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2 opacity-50 grayscale hover:grayscale-0 transition-all">
-               <div className="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center text-white">
+               <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white">
                   <i className="fas fa-pen-nib text-[9px]"></i>
                </div>
                <span className="font-black text-slate-900 serif-text text-sm">AiPen Studio</span>
@@ -548,9 +548,9 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex gap-4 opacity-30 hover:opacity-100 transition-opacity">
-               <a href="#" className="text-xs text-slate-400 hover:text-indigo-600"><i className="fab fa-youtube"></i></a>
-               <a href="#" className="text-xs text-slate-400 hover:text-indigo-600"><i className="fab fa-github"></i></a>
-               <a href="#" className="text-xs text-slate-400 hover:text-indigo-600"><i className="fab fa-linkedin"></i></a>
+               <a href="#" className="text-xs text-slate-400 hover:text-blue-600"><i className="fab fa-youtube"></i></a>
+               <a href="#" className="text-xs text-slate-400 hover:text-blue-600"><i className="fab fa-github"></i></a>
+               <a href="#" className="text-xs text-slate-400 hover:text-blue-600"><i className="fab fa-linkedin"></i></a>
             </div>
          </div>
       </footer>
