@@ -4,6 +4,8 @@ import { AppState, Book, Chapter, GenerationProgress, BookHistoryEvent } from '.
 import { geminiService } from './services/geminiService';
 import { marked } from 'marked';
 
+const LOCAL_STORAGE_KEY = 'aipen_saved_book';
+
 const Header: React.FC<{ setStep: (s: AppState) => void; hasBook: boolean; currentStep: AppState }> = ({ setStep, hasBook, currentStep }) => (
   <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 py-3 px-4 md:px-8 flex justify-between items-center no-print">
     <div className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105" onClick={() => setStep(AppState.HOME)}>
@@ -26,12 +28,6 @@ const Header: React.FC<{ setStep: (s: AppState) => void; hasBook: boolean; curre
         >
           Developer
         </button>
-        <button 
-          onClick={() => setStep(AppState.ABOUT)} 
-          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.ABOUT ? 'bg-blue-50 text-blue-600' : 'text-slate-500 bg-transparent'} hover:bg-blue-600 hover:text-white hover:shadow-md`}
-        >
-          About
-        </button>
         {hasBook && (
           <button 
             onClick={() => setStep(AppState.HISTORY)} 
@@ -40,6 +36,12 @@ const Header: React.FC<{ setStep: (s: AppState) => void; hasBook: boolean; curre
             History
           </button>
         )}
+        <button 
+          onClick={() => setStep(AppState.ABOUT)} 
+          className={`px-5 py-2.5 rounded-full transition-all duration-300 text-[9px] font-black uppercase tracking-[0.2em] ${currentStep === AppState.ABOUT ? 'bg-blue-50 text-blue-600' : 'text-slate-500 bg-transparent'} hover:bg-blue-600 hover:text-white hover:shadow-md`}
+        >
+          About
+        </button>
       </nav>
       {hasBook && currentStep !== AppState.VIEWER && (
         <button 
@@ -88,7 +90,16 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
 }
 
 const App: React.FC = () => {
-  const [step, setStep] = useState<AppState>(AppState.HOME);
+  // Load initial state from localStorage
+  const [currentBook, setCurrentBook] = useState<Book | null>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [step, setStep] = useState<AppState>(() => {
+    return localStorage.getItem(LOCAL_STORAGE_KEY) ? AppState.VIEWER : AppState.HOME;
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -96,7 +107,6 @@ const App: React.FC = () => {
   const [genre, setGenre] = useState('Business/Self-Help');
   const [length, setLength] = useState(100);
   const [author, setAuthor] = useState('');
-  const [currentBook, setCurrentBook] = useState<Book | null>(null);
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
   
   const [progress, setProgress] = useState<GenerationProgress>({
@@ -104,6 +114,13 @@ const App: React.FC = () => {
     totalChapters: 0,
     message: ''
   });
+
+  // Save book to localStorage whenever it updates
+  useEffect(() => {
+    if (currentBook) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentBook));
+    }
+  }, [currentBook]);
 
   const updateHistory = (event: string) => {
     setCurrentBook(prev => {
@@ -277,6 +294,16 @@ const App: React.FC = () => {
                   {loading ? <i className="fas fa-circle-notch fa-spin mr-2"></i> : <i className="fas fa-rocket mr-2"></i>}
                   {loading ? "Warming Up..." : "Launch Writing Studio"}
                 </button>
+                {currentBook && (
+                  <div className="text-center pt-2">
+                    <button 
+                      onClick={() => setStep(AppState.VIEWER)}
+                      className="text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest"
+                    >
+                      Continue Existing Project
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             
