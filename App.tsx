@@ -73,7 +73,7 @@ const Header: React.FC<{
         </div>
       </header>
 
-      {/* FULL SCREEN SOLID WHITE NAVIGATION - SMALLER MENUS & TOP CLOSE BUTTON */}
+      {/* FULL SCREEN SOLID WHITE NAVIGATION */}
       <div className={`fixed inset-0 w-full h-full bg-white z-[300] lg:hidden transition-all duration-500 ease-in-out flex flex-col ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
         
         {/* Top Header Section inside Menu with Cross Button */}
@@ -143,17 +143,17 @@ const Header: React.FC<{
             <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm">
                <i className="fas fa-pen-nib text-sm"></i>
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col text-left">
               <span className="serif-text font-black text-slate-900 text-xl tracking-tight leading-none">AiPen Studio</span>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Premium Books Studio</span>
             </div>
           </div>
           
           <div className="flex gap-6">
-             <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm">
+             <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
                <i className="fab fa-linkedin-in text-lg"></i>
              </a>
-             <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm">
+             <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
                <i className="fab fa-github text-lg"></i>
              </a>
           </div>
@@ -557,7 +557,7 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Pro Level Developer Page */}
+        {/* Developer Page */}
         {step === AppState.DEVELOPER && (
           <div className="w-full max-w-6xl px-6 py-12 md:py-24 animate-in zoom-in-95 duration-700 flex flex-col items-center">
              <div className="self-start mb-10">
@@ -588,7 +588,8 @@ const App: React.FC = () => {
                  <div className="space-y-12 md:space-y-16 text-center lg:text-left flex-1 w-full overflow-hidden">
                    <div className="space-y-6">
                      <span className="inline-block text-indigo-400 text-[11px] font-black uppercase tracking-[0.8em]">Developer</span>
-                     <h2 className="text-4xl md:text-6xl lg:text-8xl font-black text-white serif-text tracking-tighter leading-none whitespace-nowrap overflow-hidden text-ellipsis">
+                     {/* Refined font size for large name to ensure no truncation */}
+                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white serif-text tracking-tighter leading-none break-words">
                        Sayed Mohsin Ali
                      </h2>
                      <div className="h-1 w-24 bg-indigo-600 rounded-full mx-auto lg:mx-0"></div>
@@ -780,30 +781,4 @@ const App: React.FC = () => {
                        <h2 className="text-2xl md:text-4xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Chapter {activeChapterIndex + 1}</h2>
                        <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Architectural Draft v1.0</div>
                     </div>
-                    <div className="chapter-body text-xl md:text-2xl lg:text-3xl text-slate-700 leading-[1.8] md:leading-[1.9] serif-text">
-                      {(currentBook.outline[activeChapterIndex].content || '').split(/\[VISUAL:\s*(.*?)\s*\]/g).map((part, i) => {
-                        if (i % 2 === 0) {
-                          return <div key={i} dangerouslySetInnerHTML={{ __html: marked.parse(part) as string }} className="mb-8 md:mb-12" />;
-                        } else {
-                          return <VisualPlaceholder 
-                            key={i} 
-                            desc={part} 
-                            genre={currentBook.genre} 
-                            onReplace={(desc, b64) => handleReplaceVisual(desc, b64, activeChapterIndex)} 
-                          />;
-                        }
-                      })}
-                    </div>
-                  </div>
-               </div>
-            </div>
-          </div>
-        )}
-      </main>
-
-      <Footer />
-    </div>
-  );
-};
-
-export default App;
+                    <div className="chapter-body text-xl md:text-2xl lg
