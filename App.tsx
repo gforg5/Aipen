@@ -6,7 +6,8 @@ import { marked } from 'marked';
 
 const PROJECTS_STORAGE_KEY = 'aipen_projects_v8';
 
-// aistudio is globally defined by the environment as AIStudio
+// The global aistudio interface is pre-defined in the environment as AIStudio.
+// Manual declaration is removed to resolve "All declarations of 'aistudio' must have identical modifiers" errors.
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -259,6 +260,7 @@ const App: React.FC = () => {
     if (!currentBook) return;
     setStep(AppState.WRITING);
     setLoading(true);
+    setError(null);
     
     await ensureApiKey();
 
@@ -297,7 +299,12 @@ const App: React.FC = () => {
       setStep(AppState.VIEWER);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Authoring process interrupted.");
+      if (err.message?.includes("entity was not found")) {
+          await window.aistudio.openSelectKey();
+          setError("Session expired. Please re-select your API key.");
+      } else {
+          setError(err.message || "Authoring process interrupted.");
+      }
     } finally {
       setLoading(false);
     }
