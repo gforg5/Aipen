@@ -117,8 +117,8 @@ const Footer: React.FC = () => (
         </div>
         <div className="flex flex-col text-perspective-container">
           <span className="serif-text font-black text-slate-900 text-xl tracking-tight animate-wobble-killer text-3d-hover">AiPen Studio</span>
-          {/* Subtle zoom variant for footer text */}
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-3d-hover opacity-80">Premium AI Engineering</span>
+          {/* Subtle zoom text footer */}
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:scale-105 hover:text-slate-600 transition-all duration-300 opacity-80 cursor-default">Premium AI Engineering</span>
         </div>
       </div>
       
@@ -143,7 +143,7 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
       setError(null);
       try {
           const imgB64 = await geminiService.generateChapterImage(desc, genre);
-          onReplace(desc, imgB64);
+          onReplace(desc, b64);
       } catch (e) {
           setError("Materialization failed.");
           setLoading(false);
@@ -393,15 +393,17 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="lg:col-span-5 hidden lg:block relative killer-perspective">
+                <div className="lg:col-span-5 hidden lg:block relative">
                    <div className="absolute -inset-20 bg-indigo-500/5 blur-[120px] rounded-full"></div>
-                   {/* Clean Hero Image - No Frame, Tall Pro Aspect Ratio (3:4) */}
-                   <div className="relative z-10 overflow-hidden rotate-2 killer-tilt cursor-pointer rounded-[48px]">
-                      <img 
-                        src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200" 
-                        className="w-full aspect-[3/4] object-cover rounded-[48px] grayscale brightness-110 shadow-3xl transition-transform duration-700" 
-                        alt="Hero Manuscript Illustration"
-                      />
+                   {/* Clean Hero Image - Balanced Aspect Ratio (4:5) with Internal Zoom */}
+                   <div className="relative z-10 killer-perspective">
+                     <div className="killer-tilt rounded-[48px] shadow-3xl rotate-2 aspect-[4/5] w-full cursor-pointer">
+                       <img 
+                         src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200" 
+                         className="grayscale brightness-110" 
+                         alt="Hero Manuscript Illustration"
+                       />
+                     </div>
                    </div>
                 </div>
               </div>
@@ -462,9 +464,13 @@ const App: React.FC = () => {
                <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent"></div>
                <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-start relative z-10">
                  
-                 <div className="w-64 h-64 md:w-96 md:h-96 shrink-0 killer-perspective group">
-                   <div className="w-full h-full rounded-[60px] overflow-hidden border-8 border-slate-800 shadow-2xl killer-tilt cursor-pointer bg-slate-800">
-                      <img src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" className="w-full h-full object-cover grayscale brightness-110" />
+                 <div className="w-64 h-64 md:w-96 md:h-96 shrink-0 killer-perspective group relative">
+                   {/* Layered Killer Glow Aura behind profile */}
+                   <div className="absolute inset-0 bg-indigo-500/40 blur-[60px] rounded-full scale-75 animate-pulse"></div>
+                   <div className="absolute inset-0 bg-white/10 blur-[30px] rounded-full scale-90"></div>
+                   
+                   <div className="killer-tilt killer-glow-aura rounded-[60px] border-8 border-slate-800 shadow-2xl cursor-pointer bg-slate-800 h-full w-full relative z-10">
+                      <img src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" className="grayscale brightness-110" />
                    </div>
                  </div>
 
