@@ -19,11 +19,9 @@ export interface Book {
   title: string;
   author: string;
   genre: string;
-  targetLength: number; // In pages
-  wordCountGoal: number;
+  targetLength: number;
   outline: Chapter[];
   covers: string[];
-  selectedCoverIndex?: number;
   createdAt: string;
   history: BookHistoryEvent[];
 }
@@ -31,7 +29,6 @@ export interface Book {
 export enum AppState {
   HOME = 'HOME',
   OUTLINING = 'OUTLINING',
-  OUTLINE_EDITOR = 'OUTLINE_EDITOR',
   WRITING = 'WRITING',
   VIEWER = 'VIEWER',
   DEVELOPER = 'DEVELOPER',
