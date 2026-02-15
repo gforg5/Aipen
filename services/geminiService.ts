@@ -7,9 +7,9 @@ export const geminiService = {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const chapterCount = Math.max(5, Math.min(30, Math.ceil(length / 10)));
     
-    // Switch to gemini-3-pro-preview for complex book blueprinting
+    // Switch to gemini-3-flash-preview for the blueprint phase to avoid timeouts
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3-flash-preview',
       contents: `Generate a detailed professional book outline for a ${genre} book titled "${title}". 
       Target length: ${length} pages. Exactly ${chapterCount} chapters. 
       For each chapter, provide a title and 3-5 distinct subsections. Return raw JSON array only.`,
@@ -34,8 +34,9 @@ export const geminiService = {
 
     let jsonStr = response.text.trim();
     // Clean markdown blocks if present
-    if (jsonStr.startsWith("```")) {
-      jsonStr = jsonStr.replace(/^```(json)?/, "").replace(/```$/, "").trim();
+    if (jsonStr.includes('```')) {
+      const match = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (match) jsonStr = match[1].trim();
     }
 
     try {
@@ -54,7 +55,7 @@ export const geminiService = {
 
   async generateChapterContent(bookTitle: string, genre: string, chapter: Chapter): Promise<string> {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    // Using pro model for world-class narrative synthesis
+    // Using gemini-3-pro-preview for world-class narrative synthesis
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
       contents: `You are a world-class professional author. Write high-fidelity, comprehensive content for Chapter: "${chapter.title}" 
@@ -64,7 +65,7 @@ export const geminiService = {
       RULES:
       1. Rich, elite literary style.
       2. Insert [VISUAL: Description of illustration] placeholders where appropriate.
-      3. Extensive length.
+      3. Write at least 800 words for this segment to ensure depth.
       4. Professional markdown formatting.`,
       config: {
         thinkingConfig: { thinkingBudget: 12000 } // High reasoning for depth
@@ -91,7 +92,7 @@ export const geminiService = {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
     }
-    throw new Error("Visual materialization skipped.");
+    throw new Error("Visual materialization failed.");
   },
 
   async generateCovers(title: string, genre: string): Promise<string[]> {

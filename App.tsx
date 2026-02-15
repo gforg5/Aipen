@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { AppState, Book, Chapter, GenerationProgress, BookHistoryEvent } from './types.ts';
+import { AppState, Book, Chapter, GenerationProgress } from './types.ts';
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-const PROJECTS_STORAGE_KEY = 'aipen_projects_v7';
+const PROJECTS_STORAGE_KEY = 'aipen_projects_v8';
+
+// aistudio is globally defined by the environment as AIStudio
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -117,7 +120,6 @@ const Footer: React.FC = () => (
         </div>
         <div className="flex flex-col text-perspective-container">
           <span className="serif-text font-black text-slate-900 text-xl tracking-tight animate-wobble-killer text-3d-hover">AiPen Studio</span>
-          {/* Subtle little zoom for the text */}
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:scale-[1.05] hover:text-indigo-600 transition-all duration-500 opacity-80 cursor-default">Premium AI Engineering</span>
         </div>
       </div>
@@ -198,6 +200,21 @@ const App: React.FC = () => {
     localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
   }, [projects]);
 
+  const ensureApiKey = async () => {
+    try {
+        if (typeof window.aistudio !== 'undefined') {
+            const hasKey = await window.aistudio.hasSelectedApiKey();
+            if (!hasKey) {
+                await window.aistudio.openSelectKey();
+                return true; // Proceed assuming selection success
+            }
+        }
+    } catch (e) {
+        console.warn("Key selection dialog issue:", e);
+    }
+    return true;
+  };
+
   const startOutline = async () => {
     if (!title) {
       setError("Provide a manuscript title.");
@@ -205,6 +222,9 @@ const App: React.FC = () => {
     }
     setLoading(true);
     setError(null);
+
+    await ensureApiKey();
+
     try {
       const outline = await geminiService.generateOutline(title, genre, length);
       const newBook: Book = {
@@ -224,7 +244,12 @@ const App: React.FC = () => {
       setStep(AppState.OUTLINING);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Engine latency detected (Outline phase).");
+      if (err.message?.includes("entity was not found")) {
+          await window.aistudio.openSelectKey();
+          setError("Session expired. Please re-select your API key.");
+      } else {
+          setError(err.message || "Engine latency detected (Outline phase).");
+      }
     } finally {
       setLoading(false);
     }
@@ -235,6 +260,8 @@ const App: React.FC = () => {
     setStep(AppState.WRITING);
     setLoading(true);
     
+    await ensureApiKey();
+
     const updatedOutline = [...currentBook.outline];
     setProgress({ currentChapter: 0, totalChapters: updatedOutline.length, message: 'Initializing neural cores...' });
 
@@ -343,7 +370,7 @@ const App: React.FC = () => {
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full animate-float">
                       <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
                       <div className="text-perspective-container">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v7.0 Master Engine</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v8.0 Master Studio</span>
                       </div>
                     </div>
                     <div className="text-perspective-container block w-full">
