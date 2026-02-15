@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { AppState, Book, Chapter, GenerationProgress, BookHistoryEvent } from './types';
-import { geminiService } from './services/geminiService';
+import { AppState, Book, Chapter, GenerationProgress, BookHistoryEvent } from './types.ts';
+import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
 const PROJECTS_STORAGE_KEY = 'aipen_projects_v5';
@@ -76,7 +76,6 @@ const Header: React.FC<{
       {/* FULL SCREEN SOLID WHITE NAVIGATION */}
       <div className={`fixed inset-0 w-full h-full bg-white z-[300] lg:hidden transition-all duration-500 ease-in-out flex flex-col ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
         
-        {/* Top Header Section inside Menu with Cross Button */}
         <div className="flex items-center justify-between px-6 py-6 border-b border-slate-50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
@@ -92,7 +91,6 @@ const Header: React.FC<{
           </button>
         </div>
 
-        {/* Small Menus Section */}
         <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 max-w-xl mx-auto w-full py-8">
           <div className="space-y-3">
             {[
@@ -137,10 +135,10 @@ const Header: React.FC<{
           )}
         </div>
         
-        {/* Aligned Footer Section inside Menu */}
+        {/* REFINED MOBILE FOOTER - CENTERED & ALIGNED */}
         <div className="p-10 border-t border-slate-50 flex flex-col items-center gap-8 bg-slate-50/50">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm">
+          <div className="flex items-center justify-center gap-4 w-full">
+            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shrink-0 shadow-md">
                <i className="fas fa-pen-nib text-sm"></i>
             </div>
             <div className="flex flex-col text-left">
@@ -149,12 +147,12 @@ const Header: React.FC<{
             </div>
           </div>
           
-          <div className="flex gap-6">
-             <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
-               <i className="fab fa-linkedin-in text-lg"></i>
+          <div className="flex gap-8 justify-center w-full">
+             <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm">
+               <i className="fab fa-linkedin-in text-xl"></i>
              </a>
-             <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
-               <i className="fab fa-github text-lg"></i>
+             <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm">
+               <i className="fab fa-github text-xl"></i>
              </a>
           </div>
         </div>
@@ -404,7 +402,6 @@ const App: React.FC = () => {
       
       <main className="flex-1 flex flex-col items-center w-full relative z-0">
         
-        {/* Error Notification */}
         {error && (
           <div className="fixed top-24 z-[110] w-[90%] max-w-2xl bg-slate-900 text-white px-6 py-4 rounded-[28px] flex items-center justify-between no-print shadow-2xl animate-in slide-in-from-top-4">
             <span className="text-[10px] md:text-xs font-black tracking-widest uppercase flex items-center gap-3">
@@ -417,10 +414,8 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Home Screen */}
         {step === AppState.HOME && (
           <div className="w-full animate-in fade-in duration-1000">
-            {/* Hero Section */}
             <section className="px-6 py-12 md:py-24 max-w-7xl mx-auto w-full">
               <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
                 <div className="lg:col-span-7 space-y-10 md:space-y-14 text-center lg:text-left">
@@ -438,7 +433,6 @@ const App: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* Form Container */}
                   <div className="bg-white p-6 md:p-12 rounded-[40px] md:rounded-[64px] border border-slate-100 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] space-y-8 text-left">
                     <div className="grid sm:grid-cols-2 gap-6">
                       <div className="space-y-3">
@@ -479,7 +473,6 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Decorative Visual */}
                 <div className="lg:col-span-5 hidden lg:block relative">
                    <div className="absolute -inset-12 bg-indigo-500/5 blur-[120px] rounded-full"></div>
                    <div className="relative z-10 p-4 bg-white border border-slate-100 rounded-[80px] shadow-2xl overflow-hidden rotate-2 hover:rotate-0 transition-transform duration-700">
@@ -493,7 +486,6 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* History Section directly on Home Page */}
             <section className="bg-slate-50 py-24 md:py-32 px-6">
               <div className="max-w-7xl mx-auto w-full">
                 <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-16 gap-8 text-center md:text-left">
@@ -540,13 +532,6 @@ const App: React.FC = () => {
                                  <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{new Date(project.createdAt).toLocaleDateString()}</span>
                               </div>
                            </div>
-                           <div className="pt-8 border-t border-slate-50 flex justify-between items-center">
-                              <div className="flex flex-col">
-                                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Structure</span>
-                                <span className="text-xs font-black text-slate-900">{project.outline.length} Chapters</span>
-                              </div>
-                              <i className="fas fa-arrow-right text-slate-200 group-hover:text-slate-900 transition-all"></i>
-                           </div>
                         </div>
                       </div>
                     ))}
@@ -557,7 +542,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Developer Page */}
         {step === AppState.DEVELOPER && (
           <div className="w-full max-w-6xl px-6 py-12 md:py-24 animate-in zoom-in-95 duration-700 flex flex-col items-center">
              <div className="self-start mb-10">
@@ -588,8 +572,8 @@ const App: React.FC = () => {
                  <div className="space-y-12 md:space-y-16 text-center lg:text-left flex-1 w-full overflow-hidden">
                    <div className="space-y-6">
                      <span className="inline-block text-indigo-400 text-[11px] font-black uppercase tracking-[0.8em]">Developer</span>
-                     {/* Refined font size for large name to ensure no truncation */}
-                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white serif-text tracking-tighter leading-none break-words">
+                     {/* FLUID FONT SIZE ENSURES FULL NAME ON ONE LINE WITHOUT TRUNCATION */}
+                     <h2 className="font-black text-white serif-text tracking-tighter leading-none whitespace-nowrap overflow-visible text-[clamp(1.5rem,5.5vw,4.5rem)]">
                        Sayed Mohsin Ali
                      </h2>
                      <div className="h-1 w-24 bg-indigo-600 rounded-full mx-auto lg:mx-0"></div>
@@ -626,7 +610,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Technology/About Step */}
         {step === AppState.ABOUT && (
           <div className="w-full max-w-5xl px-6 py-12 md:py-24 animate-in fade-in duration-1000 flex flex-col items-center">
             <div className="self-start mb-12">
@@ -664,7 +647,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Outlining Step */}
         {step === AppState.OUTLINING && (
           <div className="w-full max-w-5xl px-6 py-12 md:py-24 animate-in fade-in duration-700 flex flex-col items-center">
             <div className="self-start mb-12">
@@ -690,17 +672,10 @@ const App: React.FC = () => {
                     </div>
                   ))}
                </div>
-               <div className="flex flex-col items-center gap-6 pt-10">
-                  <button onClick={startWriting} className="w-full max-w-xl py-7 bg-slate-900 text-white rounded-[32px] font-black shadow-2xl hover:scale-[1.02] transition-transform uppercase text-xs tracking-[0.4em]">
-                    Commence Full Drafting
-                  </button>
-                  <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest italic">Manuscript generation typically takes 2-5 minutes.</p>
-               </div>
             </div>
           </div>
         )}
 
-        {/* Writing Step */}
         {step === AppState.WRITING && (
            <div className="py-24 md:py-40 text-center animate-in fade-in duration-700 max-w-4xl w-full flex flex-col items-center px-6">
               <div className="relative mb-16">
@@ -722,10 +697,8 @@ const App: React.FC = () => {
            </div>
         )}
 
-        {/* Viewer Step */}
         {step === AppState.VIEWER && currentBook && (
           <div className="w-full animate-in fade-in duration-1000 flex flex-col items-center px-4 md:px-0">
-            {/* Nav Overlays */}
             <div className="fixed bottom-8 left-1/2 -translate-x-1/2 md:left-14 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-4 md:gap-8 z-50 no-print bg-white/70 backdrop-blur-2xl p-4 md:p-0 rounded-[32px] md:bg-transparent shadow-2xl md:shadow-none border border-slate-200 md:border-none">
                <button 
                 disabled={activeChapterIndex === 0}
@@ -734,9 +707,6 @@ const App: React.FC = () => {
                >
                  <i className="fas fa-chevron-left md:text-2xl"></i>
                </button>
-               <div className="flex md:hidden items-center px-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                 {activeChapterIndex + 1} / {currentBook.outline.length}
-               </div>
                <button 
                 disabled={activeChapterIndex === currentBook.outline.length - 1}
                 onClick={() => { setActiveChapterIndex(p => p + 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
@@ -781,4 +751,30 @@ const App: React.FC = () => {
                        <h2 className="text-2xl md:text-4xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Chapter {activeChapterIndex + 1}</h2>
                        <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Architectural Draft v1.0</div>
                     </div>
-                    <div className="chapter-body text-xl md:text-2xl lg
+                    <div className="chapter-body text-xl md:text-2xl lg:text-3xl text-slate-700 leading-[1.8] md:leading-[1.9] serif-text">
+                      {(currentBook.outline[activeChapterIndex].content || '').split(/\[VISUAL:\s*(.*?)\s*\]/g).map((part, i) => {
+                        if (i % 2 === 0) {
+                          return <div key={i} dangerouslySetInnerHTML={{ __html: marked.parse(part) as string }} className="mb-8 md:mb-12" />;
+                        } else {
+                          return <VisualPlaceholder 
+                            key={i} 
+                            desc={part} 
+                            genre={currentBook.genre} 
+                            onReplace={(desc, b64) => handleReplaceVisual(desc, b64, activeChapterIndex)} 
+                          />;
+                        }
+                      })}
+                    </div>
+                  </div>
+               </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default App;

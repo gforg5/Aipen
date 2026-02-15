@@ -1,11 +1,16 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Chapter } from "../types";
+import { Chapter } from "../types.ts";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Helper to safely get AI instance
+const getAI = () => {
+  const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : (window as any).API_KEY;
+  return new GoogleGenAI({ apiKey: apiKey || '' });
+};
 
 export const geminiService = {
   async generateOutline(title: string, genre: string, length: number): Promise<Chapter[]> {
+    const ai = getAI();
     const chapterCount = Math.max(5, Math.min(30, Math.ceil(length / 10)));
     
     const response = await ai.models.generateContent({
@@ -42,6 +47,7 @@ export const geminiService = {
   },
 
   async generateChapterContent(bookTitle: string, genre: string, chapter: Chapter): Promise<string> {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `You are a world-class professional author. Write the full, detailed content for Chapter: "${chapter.title}" 
@@ -62,6 +68,7 @@ export const geminiService = {
   },
 
   async generateChapterImage(desc: string, genre: string): Promise<string> {
+    const ai = getAI();
     const prompt = `A professional book illustration for a ${genre} book. Concept: ${desc}. Visual style: highly aesthetic, cohesive, clean. No text on image. High resolution.`;
     
     const response = await ai.models.generateContent({
@@ -83,6 +90,7 @@ export const geminiService = {
   },
 
   async generateCovers(title: string, genre: string): Promise<string[]> {
+    const ai = getAI();
     const styles = [
       "Minimalist and modern",
       "Epic cinematic style",
