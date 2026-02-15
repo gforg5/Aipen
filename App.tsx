@@ -3,7 +3,7 @@ import { AppState, Book, Chapter, GenerationProgress, BookHistoryEvent } from '.
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-const PROJECTS_STORAGE_KEY = 'aipen_projects_v5';
+const PROJECTS_STORAGE_KEY = 'aipen_projects_v6';
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -117,8 +117,8 @@ const Footer: React.FC = () => (
         </div>
         <div className="flex flex-col text-perspective-container">
           <span className="serif-text font-black text-slate-900 text-xl tracking-tight animate-wobble-killer text-3d-hover">AiPen Studio</span>
-          {/* Subtle zoom text footer */}
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:scale-105 hover:text-slate-600 transition-all duration-300 opacity-80 cursor-default">Premium AI Engineering</span>
+          {/* Subtle zoom animation on footer text */}
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:scale-105 hover:text-indigo-600 transition-all duration-500 opacity-80 cursor-default">Premium AI Engineering</span>
         </div>
       </div>
       
@@ -143,7 +143,7 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
       setError(null);
       try {
           const imgB64 = await geminiService.generateChapterImage(desc, genre);
-          onReplace(desc, b64);
+          onReplace(desc, imgB64);
       } catch (e) {
           setError("Materialization failed.");
           setLoading(false);
@@ -151,23 +151,23 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
   }
 
   return (
-      <div className="my-12 p-8 md:p-16 bg-slate-50 rounded-[32px] border border-slate-100 text-center no-print animate-scale-up hover:bg-white transition-all duration-500 hover:shadow-xl">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md mx-auto mb-6 animate-float">
-            <i className="fas fa-wand-magic-sparkles text-indigo-500 text-xl"></i>
-          </div>
-          <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Neural Materialization Required</div>
-          <p className="text-lg md:text-xl text-slate-700 italic font-medium max-w-xl mx-auto mb-10 serif-text leading-relaxed">"{desc}"</p>
-          
-          <button 
-              onClick={generate}
-              disabled={loading}
-              className="group relative bg-slate-900 text-white px-10 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl disabled:opacity-50 inline-flex items-center gap-3 btn-killer"
-          >
-              {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-image"></i>}
-              {loading ? "Materializing..." : "Manifest Visual Context"}
-          </button>
-          {error && <div className="text-red-500 text-[10px] mt-4 font-bold uppercase tracking-widest">{error}</div>}
-      </div>
+    <div className="my-12 p-8 md:p-16 bg-slate-50 rounded-[32px] border border-slate-100 text-center no-print animate-scale-up hover:bg-white transition-all duration-500 hover:shadow-xl">
+        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md mx-auto mb-6 animate-float">
+          <i className="fas fa-wand-magic-sparkles text-indigo-500 text-xl"></i>
+        </div>
+        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Neural Materialization Required</div>
+        <p className="text-lg md:text-xl text-slate-700 italic font-medium max-w-xl mx-auto mb-10 serif-text leading-relaxed">"{desc}"</p>
+        
+        <button 
+            onClick={generate}
+            disabled={loading}
+            className="group relative bg-slate-900 text-white px-10 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl disabled:opacity-50 inline-flex items-center gap-3 btn-killer"
+        >
+            {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-image"></i>}
+            {loading ? "Materializing..." : "Manifest Visual Context"}
+        </button>
+        {error && <div className="text-red-500 text-[10px] mt-4 font-bold uppercase tracking-widest">{error}</div>}
+    </div>
   )
 }
 
@@ -223,7 +223,8 @@ const App: React.FC = () => {
       setProjects(prev => [newBook, ...prev]);
       setStep(AppState.OUTLINING);
     } catch (err: any) {
-      setError("Engine latency detected.");
+      console.error(err);
+      setError("Engine latency detected (Outline phase).");
     } finally {
       setLoading(false);
     }
@@ -268,6 +269,7 @@ const App: React.FC = () => {
       });
       setStep(AppState.VIEWER);
     } catch (err: any) {
+      console.error(err);
       setError("Authoring process interrupted.");
     } finally {
       setLoading(false);
@@ -281,8 +283,7 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const deleteProject = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
+  const deleteProject = (id: string) => {
     if (confirm("Permanently delete archive?")) {
         setProjects(prev => prev.filter(p => p.id !== id));
         if (currentBook?.id === id) setCurrentBook(null);
@@ -342,7 +343,7 @@ const App: React.FC = () => {
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full animate-float">
                       <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
                       <div className="text-perspective-container">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v5.2 Neural Engine</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v6.0 High-Fidelity Engine</span>
                       </div>
                     </div>
                     <div className="text-perspective-container block w-full">
@@ -395,12 +396,12 @@ const App: React.FC = () => {
                 
                 <div className="lg:col-span-5 hidden lg:block relative">
                    <div className="absolute -inset-20 bg-indigo-500/5 blur-[120px] rounded-full"></div>
-                   {/* Clean Hero Image - Balanced Aspect Ratio (4:5) with Internal Zoom */}
+                   {/* Main Hero Image - Pro Balanced Aspect (4:5) with Internal Zoom */}
                    <div className="relative z-10 killer-perspective">
-                     <div className="killer-tilt rounded-[48px] shadow-3xl rotate-2 aspect-[4/5] w-full cursor-pointer">
+                     <div className="killer-tilt rounded-[48px] shadow-3xl rotate-2 aspect-[4/5] w-full cursor-pointer bg-slate-100">
                        <img 
                          src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200" 
-                         className="grayscale brightness-110" 
+                         className="grayscale brightness-110 h-full w-full object-cover" 
                          alt="Hero Manuscript Illustration"
                        />
                      </div>
@@ -427,7 +428,7 @@ const App: React.FC = () => {
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {projects.map(project => (
                       <div key={project.id} onClick={() => loadProject(project)} className="group bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover-card cursor-pointer flex flex-col relative overflow-hidden">
-                        <button onClick={(e) => deleteProject(e, project.id)} className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center z-10">
+                        <button onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }} className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center z-10">
                           <i className="fas fa-trash-alt text-xs"></i>
                         </button>
                         <div className="space-y-6">
@@ -465,12 +466,11 @@ const App: React.FC = () => {
                <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-start relative z-10">
                  
                  <div className="w-64 h-64 md:w-96 md:h-96 shrink-0 killer-perspective group relative">
-                   {/* Layered Killer Glow Aura behind profile */}
-                   <div className="absolute inset-0 bg-indigo-500/40 blur-[60px] rounded-full scale-75 animate-pulse"></div>
-                   <div className="absolute inset-0 bg-white/10 blur-[30px] rounded-full scale-90"></div>
+                   {/* Killer Level Glow Aura */}
+                   <div className="absolute inset-0 bg-indigo-500/40 blur-[80px] rounded-full animate-pulse scale-75"></div>
                    
-                   <div className="killer-tilt killer-glow-aura rounded-[60px] border-8 border-slate-800 shadow-2xl cursor-pointer bg-slate-800 h-full w-full relative z-10">
-                      <img src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" className="grayscale brightness-110" />
+                   <div className="killer-tilt killer-glow-aura rounded-[60px] cursor-pointer bg-slate-800 h-full w-full relative z-10">
+                      <img src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" className="grayscale brightness-110 h-full w-full object-cover rounded-[56px]" />
                    </div>
                  </div>
 
