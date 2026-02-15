@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { AppState, Book, Chapter, GenerationProgress, BookHistoryEvent } from './types.ts';
 import { geminiService } from './services/geminiService.ts';
@@ -13,7 +12,6 @@ const Header: React.FC<{
 }> = ({ setStep, currentStep, activeProject }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Strictly lock body scroll to prevent any background interaction
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -29,12 +27,12 @@ const Header: React.FC<{
 
   return (
     <>
-      <header className="sticky top-0 z-[100] bg-white/80 backdrop-blur-2xl border-b border-slate-100 py-4 px-4 md:px-12 flex justify-between items-center no-print">
+      <header className="sticky top-0 z-[100] bg-white/80 backdrop-blur-2xl border-b border-slate-100 py-3 px-4 md:px-12 flex justify-between items-center no-print">
         <div className="flex items-center gap-3 cursor-pointer z-[110]" onClick={() => handleNav(AppState.HOME)}>
-          <div className="w-9 h-9 md:w-11 md:h-11 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-xl shadow-slate-200">
-            <i className="fas fa-pen-nib text-base md:text-xl"></i>
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded-lg flex items-center justify-center text-white shadow-xl shadow-slate-200">
+            <i className="fas fa-pen-nib text-sm md:text-lg"></i>
           </div>
-          <h1 className="text-xl md:text-2xl font-black tracking-tighter text-slate-900 serif-text">AiPen</h1>
+          <h1 className="text-lg md:text-xl font-black tracking-tighter text-slate-900 serif-text">AiPen</h1>
         </div>
         
         <nav className="hidden lg:flex items-center gap-1">
@@ -46,7 +44,7 @@ const Header: React.FC<{
             <button 
               key={item.label}
               onClick={() => handleNav(item.step)} 
-              className={`px-5 py-2 rounded-full transition-all text-[11px] font-black uppercase tracking-widest ${currentStep === item.step ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+              className={`px-4 py-1.5 rounded-full transition-all text-[10px] font-black uppercase tracking-widest ${currentStep === item.step ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
             >
               {item.label}
             </button>
@@ -57,7 +55,7 @@ const Header: React.FC<{
           {activeProject && currentStep !== AppState.VIEWER && (
             <button 
               onClick={() => handleNav(AppState.VIEWER)} 
-              className="hidden sm:flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 font-black text-[10px] uppercase tracking-widest"
+              className="hidden sm:flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 font-black text-[9px] uppercase tracking-widest"
             >
               <i className="fas fa-play text-[8px]"></i> Resume
             </button>
@@ -65,7 +63,7 @@ const Header: React.FC<{
           
           <button 
             onClick={() => setIsMenuOpen(true)}
-            className="lg:hidden w-11 h-11 rounded-xl flex items-center justify-center bg-slate-50 text-slate-900 focus:outline-none transition-all active:scale-95"
+            className="lg:hidden w-10 h-10 rounded-lg flex items-center justify-center bg-slate-50 text-slate-900 focus:outline-none transition-all active:scale-95"
             aria-label="Open Menu"
           >
             <i className="fas fa-bars-staggered text-lg"></i>
@@ -73,25 +71,24 @@ const Header: React.FC<{
         </div>
       </header>
 
-      {/* FULL SCREEN SOLID WHITE NAVIGATION */}
       <div className={`fixed inset-0 w-full h-full bg-white z-[300] lg:hidden transition-all duration-500 ease-in-out flex flex-col ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
         
-        <div className="flex items-center justify-between px-6 py-6 border-b border-slate-50">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
               <i className="fas fa-pen-nib text-xs"></i>
             </div>
-            <span className="text-lg font-black tracking-tighter text-slate-900 serif-text uppercase tracking-widest text-[14px]">Navigation</span>
+            <span className="text-base font-black tracking-tighter text-slate-900 serif-text uppercase tracking-widest">Navigation</span>
           </div>
           <button 
             onClick={() => setIsMenuOpen(false)}
-            className="w-12 h-12 rounded-full bg-slate-50 text-slate-900 flex items-center justify-center hover:bg-slate-100 transition-colors active:scale-90"
+            className="w-10 h-10 rounded-full bg-slate-50 text-slate-900 flex items-center justify-center hover:bg-slate-100 transition-colors active:scale-90"
           >
-            <i className="fas fa-times text-xl"></i>
+            <i className="fas fa-times text-lg"></i>
           </button>
         </div>
 
-        <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 max-w-xl mx-auto w-full py-8">
+        <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 max-w-xl mx-auto w-full py-6">
           <div className="space-y-3">
             {[
               { label: 'Studio', step: AppState.HOME, icon: 'fa-layer-group', desc: 'Craft your book' },
@@ -101,10 +98,10 @@ const Header: React.FC<{
               <button 
                 key={item.label}
                 onClick={() => handleNav(item.step)}
-                className={`flex items-center gap-4 p-4 rounded-[24px] transition-all text-left border w-full group ${currentStep === item.step ? 'bg-slate-900 border-slate-900 text-white shadow-xl' : 'bg-slate-50 border-transparent text-slate-600'}`}
+                className={`flex items-center gap-4 p-4 rounded-[20px] transition-all text-left border w-full group ${currentStep === item.step ? 'bg-slate-900 border-slate-900 text-white shadow-xl' : 'bg-slate-50 border-transparent text-slate-600'}`}
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${currentStep === item.step ? 'bg-indigo-500' : 'bg-white shadow-sm'}`}>
-                  <i className={`fas ${item.icon} text-[13px] ${currentStep === item.step ? 'text-white' : 'text-slate-400'}`}></i>
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${currentStep === item.step ? 'bg-indigo-500' : 'bg-white shadow-sm'}`}>
+                  <i className={`fas ${item.icon} text-[12px] ${currentStep === item.step ? 'text-white' : 'text-slate-400'}`}></i>
                 </div>
                 <div>
                   <span className="text-lg font-black serif-text block leading-none mb-0.5">{item.label}</span>
@@ -115,9 +112,9 @@ const Header: React.FC<{
           </div>
 
           {activeProject && (
-            <div className="mt-8 p-6 bg-indigo-600 rounded-[32px] text-white shadow-2xl shadow-indigo-100 relative overflow-hidden group">
+            <div className="mt-6 p-5 bg-indigo-600 rounded-[28px] text-white shadow-2xl shadow-indigo-100 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                <i className="fas fa-book-open text-4xl"></i>
+                <i className="fas fa-book-open text-3xl"></i>
               </div>
               <div className="relative z-10 flex flex-col items-start gap-3">
                 <div className="flex flex-col text-left">
@@ -126,7 +123,7 @@ const Header: React.FC<{
                 </div>
                 <button 
                   onClick={() => handleNav(AppState.VIEWER)} 
-                  className="w-full bg-white text-indigo-600 py-3.5 rounded-xl font-black text-[9px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-lg"
+                  className="w-full bg-white text-indigo-600 py-3 rounded-lg font-black text-[9px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-lg"
                 >
                   Jump Back In
                 </button>
@@ -135,24 +132,23 @@ const Header: React.FC<{
           )}
         </div>
         
-        {/* REFINED MOBILE FOOTER - CENTERED & ALIGNED */}
-        <div className="p-10 border-t border-slate-50 flex flex-col items-center gap-8 bg-slate-50/50">
-          <div className="flex items-center justify-center gap-4 w-full">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shrink-0 shadow-md">
-               <i className="fas fa-pen-nib text-sm"></i>
+        <div className="p-8 border-t border-slate-50 flex flex-col items-center gap-6 bg-slate-50/50">
+          <div className="flex items-center justify-center gap-3 w-full">
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white shrink-0 shadow-md">
+               <i className="fas fa-pen-nib text-xs"></i>
             </div>
             <div className="flex flex-col text-left">
-              <span className="serif-text font-black text-slate-900 text-xl tracking-tight leading-none">AiPen Studio</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Premium Books Studio</span>
+              <span className="serif-text font-black text-slate-900 text-lg tracking-tight leading-none">AiPen Studio</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Premium Books Studio</span>
             </div>
           </div>
           
-          <div className="flex gap-8 justify-center w-full">
-             <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm">
-               <i className="fab fa-linkedin-in text-xl"></i>
+          <div className="flex gap-6 justify-center w-full">
+             <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
+               <i className="fab fa-linkedin-in text-lg"></i>
              </a>
-             <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm">
-               <i className="fab fa-github text-xl"></i>
+             <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
+               <i className="fab fa-github text-lg"></i>
              </a>
           </div>
         </div>
@@ -162,21 +158,21 @@ const Header: React.FC<{
 };
 
 const Footer: React.FC = () => (
-  <footer className="w-full bg-white py-12 px-6 border-t border-slate-50 no-print mt-auto">
-    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
+  <footer className="w-full bg-white py-10 px-6 border-t border-slate-50 no-print mt-auto">
+    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
            <i className="fas fa-pen-nib"></i>
         </div>
         <div className="flex flex-col text-center md:text-left">
-          <span className="serif-text font-black text-slate-900 text-xl tracking-tight">AiPen Studio</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Premium Books Studio</span>
+          <span className="serif-text font-black text-slate-900 text-lg tracking-tight leading-none">AiPen Studio</span>
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Premium Books Studio</span>
         </div>
       </div>
       
-      <div className="flex gap-6">
-        <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-sm"><i className="fab fa-linkedin-in text-lg"></i></a>
-        <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-sm"><i className="fab fa-github text-lg"></i></a>
+      <div className="flex gap-5">
+        <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all"><i className="fab fa-linkedin-in text-lg"></i></a>
+        <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all"><i className="fab fa-github text-lg"></i></a>
       </div>
     </div>
   </footer>
@@ -199,21 +195,21 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
   }
 
   return (
-      <div className="my-12 p-8 md:p-16 bg-slate-50 rounded-[40px] md:rounded-[64px] border border-slate-100 text-center no-print">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm mx-auto mb-6">
-            <i className="fas fa-wand-magic-sparkles text-indigo-500 text-xl"></i>
+      <div className="my-10 p-6 md:p-12 bg-slate-50 rounded-[32px] md:rounded-[48px] border border-slate-100 text-center no-print">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm mx-auto mb-5">
+            <i className="fas fa-wand-magic-sparkles text-indigo-500 text-lg"></i>
           </div>
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Narrative Visualization</div>
-          <p className="text-base md:text-xl text-slate-700 italic font-medium max-w-2xl mx-auto mb-10 serif-text leading-relaxed">"{desc}"</p>
+          <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Narrative Visualization</div>
+          <p className="text-base md:text-lg text-slate-700 italic font-medium max-w-xl mx-auto mb-8 serif-text leading-relaxed">"{desc}"</p>
           
           <button 
               onClick={generate}
               disabled={loading}
-              className="bg-slate-900 text-white px-10 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl disabled:opacity-50 inline-flex items-center gap-3"
+              className="bg-slate-900 text-white px-8 py-4 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl disabled:opacity-50 inline-flex items-center gap-3"
           >
               {loading ? <><i className="fas fa-spinner fa-spin"></i> Rendering...</> : <><i className="fas fa-image"></i> Materialize Image</>}
           </button>
-          {error && <div className="text-red-500 text-[10px] mt-4 font-bold uppercase tracking-widest">{error}</div>}
+          {error && <div className="text-red-500 text-[9px] mt-4 font-bold uppercase tracking-widest">{error}</div>}
       </div>
   )
 }
@@ -363,7 +359,7 @@ const App: React.FC = () => {
     const chapter = { ...updatedOutline[chapterIndex] };
     
     const regex = new RegExp(`\\[VISUAL:\\s*${desc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\]`);
-    const imageHtml = `\n\n<div class="my-12 md:my-20 text-center break-inside-avoid"><img src="${base64}" alt="${desc}" class="rounded-[32px] md:rounded-[64px] shadow-2xl mx-auto w-full border-8 border-white" /><p class="mt-6 text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Generated Illustration</p></div>\n\n`;
+    const imageHtml = `\n\n<div class="my-10 md:my-16 text-center break-inside-avoid"><img src="${base64}" alt="${desc}" class="rounded-[24px] md:rounded-[40px] shadow-2xl mx-auto w-full border-4 border-white" /><p class="mt-4 text-[9px] font-black uppercase tracking-[0.4em] text-slate-300">Generated Illustration</p></div>\n\n`;
     
     chapter.content = (chapter.content || '').replace(regex, imageHtml);
     updatedOutline[chapterIndex] = chapter;
@@ -403,70 +399,71 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col items-center w-full relative z-0">
         
         {error && (
-          <div className="fixed top-24 z-[110] w-[90%] max-w-2xl bg-slate-900 text-white px-6 py-4 rounded-[28px] flex items-center justify-between no-print shadow-2xl animate-in slide-in-from-top-4">
+          <div className="fixed top-20 z-[110] w-[90%] max-w-2xl bg-slate-900 text-white px-5 py-3.5 rounded-[24px] flex items-center justify-between no-print shadow-2xl animate-in slide-in-from-top-4">
             <span className="text-[10px] md:text-xs font-black tracking-widest uppercase flex items-center gap-3">
               <i className="fas fa-exclamation-triangle text-indigo-400"></i>
               {error}
             </span>
-            <button onClick={() => setError(null)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all flex items-center justify-center">
-               <i className="fas fa-times text-xs"></i>
+            <button onClick={() => setError(null)} className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 transition-all flex items-center justify-center">
+               <i className="fas fa-times text-[10px]"></i>
             </button>
           </div>
         )}
 
         {step === AppState.HOME && (
           <div className="w-full animate-in fade-in duration-1000">
-            <section className="px-6 py-12 md:py-24 max-w-7xl mx-auto w-full">
-              <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-                <div className="lg:col-span-7 space-y-10 md:space-y-14 text-center lg:text-left">
-                  <div className="space-y-6">
-                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full">
-                      <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">v5.0 Enterprise Edition</span>
+            {/* COMPACT HERO SECTION */}
+            <section className="px-6 py-8 md:py-16 max-w-7xl mx-auto w-full">
+              <div className="grid lg:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
+                <div className="lg:col-span-7 space-y-6 md:space-y-10 text-center lg:text-left">
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-3 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-full">
+                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">v5.0 Enterprise Edition</span>
                     </div>
-                    <h2 className="text-5xl md:text-7xl lg:text-9xl font-black text-slate-900 serif-text tracking-tighter leading-[0.95]">
+                    <h2 className="text-4xl md:text-6xl lg:text-8xl font-black text-slate-900 serif-text tracking-tighter leading-[0.95]">
                       Architect <br className="hidden md:block"/>
                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-400 italic">Masterpieces.</span>
                     </h2>
-                    <p className="text-lg md:text-xl lg:text-2xl text-slate-400 font-medium max-w-2xl mx-auto lg:mx-0 serif-text leading-relaxed">
-                      AI-driven manuscript architecture. Turn a simple concept into a 50 to 500-page professional publication.
+                    <p className="text-base md:text-lg lg:text-xl text-slate-400 font-medium max-w-xl mx-auto lg:mx-0 serif-text leading-relaxed">
+                      AI-driven manuscript architecture. Turn a simple concept into a professional publication.
                     </p>
                   </div>
 
-                  <div className="bg-white p-6 md:p-12 rounded-[40px] md:rounded-[64px] border border-slate-100 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] space-y-8 text-left">
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] px-2">Book Title</label>
+                  <div className="bg-white p-6 md:p-8 rounded-[32px] md:rounded-[48px] border border-slate-100 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.06)] space-y-6 text-left">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] px-2">Book Title</label>
                         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. The Quantum Divide"
-                          className="w-full px-6 py-5 rounded-[24px] border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-300 font-black serif-text text-xl" />
+                          className="w-full px-5 py-4 rounded-[18px] border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all placeholder:text-slate-300 font-black serif-text text-lg" />
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] px-2">Author Name</label>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] px-2">Author Name</label>
                         <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Your Name"
-                          className="w-full px-6 py-5 rounded-[24px] border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-bold" />
+                          className="w-full px-5 py-4 rounded-[18px] border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all font-bold text-sm" />
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] px-2">Category</label>
-                        <select value={genre} onChange={(e) => setGenre(e.target.value)} className="w-full px-6 py-5 rounded-[24px] border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 outline-none appearance-none font-bold">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] px-2">Category</label>
+                        <select value={genre} onChange={(e) => setGenre(e.target.value)} className="w-full px-5 py-4 rounded-[18px] border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-50/50 outline-none appearance-none font-bold text-sm">
                           <option>Business/Self-Help</option>
                           <option>Science Fiction</option>
                           <option>Mystery/Thriller</option>
                           <option>Educational</option>
                         </select>
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] px-2">Target Pages</label>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] px-2">Target Pages</label>
                         <div className="relative">
-                          <input type="number" min="50" max="500" value={length} onChange={(e) => setLength(parseInt(e.target.value))} className="w-full px-6 py-5 rounded-[24px] border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 outline-none font-bold" />
-                          <span className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase tracking-widest pointer-events-none hidden sm:block">Pages</span>
+                          <input type="number" min="50" max="500" value={length} onChange={(e) => setLength(parseInt(e.target.value))} className="w-full px-5 py-4 rounded-[18px] border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-50/50 outline-none font-bold text-sm" />
+                          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-300 uppercase tracking-widest pointer-events-none hidden sm:block">Pages</span>
                         </div>
                       </div>
                     </div>
 
-                    <button onClick={startOutline} disabled={loading} className="w-full py-6 bg-slate-900 text-white rounded-[28px] font-black hover:bg-slate-800 transition-all shadow-2xl disabled:bg-slate-200 uppercase text-xs tracking-[0.3em] flex items-center justify-center gap-4">
+                    <button onClick={startOutline} disabled={loading} className="w-full py-5 bg-slate-900 text-white rounded-[20px] font-black hover:bg-slate-800 transition-all shadow-xl disabled:bg-slate-200 uppercase text-[10px] tracking-[0.3em] flex items-center justify-center gap-3">
                       {loading ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-layer-group"></i>}
                       {loading ? "Constructing..." : "Architect Manuscript"}
                     </button>
@@ -474,11 +471,11 @@ const App: React.FC = () => {
                 </div>
                 
                 <div className="lg:col-span-5 hidden lg:block relative">
-                   <div className="absolute -inset-12 bg-indigo-500/5 blur-[120px] rounded-full"></div>
-                   <div className="relative z-10 p-4 bg-white border border-slate-100 rounded-[80px] shadow-2xl overflow-hidden rotate-2 hover:rotate-0 transition-transform duration-700">
+                   <div className="absolute -inset-10 bg-indigo-500/5 blur-[100px] rounded-full"></div>
+                   <div className="relative z-10 p-3 bg-white border border-slate-100 rounded-[60px] shadow-xl overflow-hidden rotate-2 hover:rotate-0 transition-transform duration-700">
                       <img 
                         src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200" 
-                        className="w-full aspect-[4/5.5] object-cover rounded-[64px] grayscale brightness-110" 
+                        className="w-full aspect-[4/5] object-cover rounded-[50px] grayscale brightness-110" 
                         alt="Elite Studio" 
                       />
                    </div>
@@ -486,50 +483,51 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            <section className="bg-slate-50 py-24 md:py-32 px-6">
+            {/* COMPACT HISTORY SECTION */}
+            <section className="bg-slate-50 py-12 md:py-20 px-6">
               <div className="max-w-7xl mx-auto w-full">
-                <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-16 gap-8 text-center md:text-left">
-                  <div className="space-y-4">
-                    <span className="text-indigo-600 text-[10px] font-black uppercase tracking-[0.4em]">Vault Access</span>
-                    <h3 className="text-4xl md:text-6xl font-black text-slate-900 serif-text tracking-tight">Recent Books History</h3>
-                    <p className="text-slate-400 text-lg md:text-xl font-medium serif-text italic">Your persistent collection of literary architecture.</p>
+                <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-10 gap-6 text-center md:text-left">
+                  <div className="space-y-2">
+                    <span className="text-indigo-600 text-[9px] font-black uppercase tracking-[0.4em]">Vault Access</span>
+                    <h3 className="text-3xl md:text-5xl font-black text-slate-900 serif-text tracking-tight">Recent Archives</h3>
+                    <p className="text-slate-400 text-base md:text-lg font-medium serif-text italic">Your persistent collection of literary architecture.</p>
                   </div>
                 </div>
 
                 {projects.length === 0 ? (
-                  <div className="py-24 md:py-40 bg-white border border-slate-100 rounded-[64px] flex flex-col items-center text-center px-6 shadow-sm">
-                     <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 mb-8">
-                        <i className="fas fa-folder-open text-4xl"></i>
+                  <div className="py-16 md:py-24 bg-white border border-slate-100 rounded-[48px] flex flex-col items-center text-center px-6 shadow-sm">
+                     <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 mb-6">
+                        <i className="fas fa-folder-open text-3xl"></i>
                      </div>
-                     <h4 className="text-2xl font-black text-slate-300 serif-text">No History Found</h4>
-                     <p className="text-slate-400 text-[10px] mt-4 font-black uppercase tracking-widest">Architect your first project above to populate this vault.</p>
+                     <h4 className="text-xl font-black text-slate-300 serif-text">No History Found</h4>
+                     <p className="text-slate-400 text-[9px] mt-2 font-black uppercase tracking-widest">Architect your first project above to populate this vault.</p>
                   </div>
                 ) : (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {projects.map(project => (
                       <div 
                         key={project.id} 
                         onClick={() => loadProject(project)}
-                        className="group bg-white p-10 rounded-[48px] border border-slate-100 shadow-sm hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] hover:-translate-y-2 transition-all cursor-pointer flex flex-col relative overflow-hidden"
+                        className="group bg-white p-7 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col relative overflow-hidden"
                       >
-                        <div className="absolute top-0 right-0 p-8">
+                        <div className="absolute top-0 right-0 p-5">
                            <button 
                              onClick={(e) => deleteProject(e, project.id)}
-                             className="w-10 h-10 rounded-xl bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center"
+                             className="w-8 h-8 rounded-lg bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center"
                            >
-                             <i className="fas fa-trash-alt text-sm"></i>
+                             <i className="fas fa-trash-alt text-xs"></i>
                            </button>
                         </div>
-                        <div className="space-y-8 flex-1">
-                           <div className="w-16 h-16 bg-slate-50 text-slate-900 rounded-2xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all">
-                              <i className="fas fa-book-open text-2xl"></i>
+                        <div className="space-y-6 flex-1">
+                           <div className="w-12 h-12 bg-slate-50 text-slate-900 rounded-xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm">
+                              <i className="fas fa-book-open text-xl"></i>
                            </div>
-                           <div className="space-y-2">
-                              <h4 className="text-2xl font-black text-slate-900 serif-text line-clamp-2 leading-tight">{project.title}</h4>
-                              <div className="flex items-center gap-3">
-                                 <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest">{project.genre}</span>
+                           <div className="space-y-1">
+                              <h4 className="text-xl font-black text-slate-900 serif-text line-clamp-2 leading-tight">{project.title}</h4>
+                              <div className="flex items-center gap-2">
+                                 <span className="text-[9px] text-indigo-500 font-black uppercase tracking-widest">{project.genre}</span>
                                  <span className="text-slate-200">•</span>
-                                 <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{new Date(project.createdAt).toLocaleDateString()}</span>
+                                 <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{new Date(project.createdAt).toLocaleDateString()}</span>
                               </div>
                            </div>
                         </div>
@@ -543,65 +541,72 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.DEVELOPER && (
-          <div className="w-full max-w-6xl px-6 py-12 md:py-24 animate-in zoom-in-95 duration-700 flex flex-col items-center">
-             <div className="self-start mb-10">
-                <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-100 transition-all shadow-sm">
+          <div className="w-full max-w-6xl px-6 py-10 md:py-16 animate-in zoom-in-95 duration-700 flex flex-col items-center">
+             <div className="self-start mb-8 animate-fade-in-up">
+                <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-5 py-2.5 bg-slate-50 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-100 transition-all shadow-sm">
                   <i className="fas fa-arrow-left"></i> Studio
                 </button>
              </div>
              
-             <div className="w-full bg-slate-900 rounded-[48px] md:rounded-[80px] p-8 md:p-12 lg:p-24 relative overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border border-white/5">
+             <div className="w-full bg-slate-900 rounded-[40px] md:rounded-[60px] p-8 md:p-12 lg:p-20 relative overflow-hidden shadow-2xl border border-white/5 animate-float-slow">
                <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent"></div>
-               <div className="flex flex-col lg:flex-row gap-16 md:gap-24 items-center lg:items-start relative z-10">
+               <div className="flex flex-col lg:flex-row gap-12 md:gap-16 items-center lg:items-start relative z-10">
                  
-                 <div className="w-64 h-64 md:w-96 md:h-96 shrink-0 relative group">
-                   <div className="absolute -inset-6 bg-indigo-500/20 rounded-[70px] blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-                   <div className="absolute -inset-2 bg-white/5 rounded-[56px] backdrop-blur-sm border border-white/10 group-hover:border-indigo-500/30 transition-all duration-500"></div>
-                   <div className="w-full h-full rounded-[48px] overflow-hidden relative z-10 border-4 border-slate-800 shadow-2xl">
+                 <div className="w-48 h-48 md:w-80 md:h-80 shrink-0 relative group animate-fade-in-up">
+                   <div className="absolute -inset-4 bg-indigo-500/20 rounded-[50px] blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+                   <div className="absolute -inset-1 bg-white/5 rounded-[42px] backdrop-blur-sm border border-white/10 group-hover:border-indigo-500/30 transition-all duration-500"></div>
+                   <div className="w-full h-full rounded-[40px] overflow-hidden relative z-10 border-4 border-slate-800 shadow-xl">
                       <img 
                         src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" 
                         className="w-full h-full object-cover grayscale brightness-110 hover:grayscale-0 hover:scale-110 transition-all duration-1000 ease-in-out cursor-pointer" 
                         alt="Sayed Mohsin Ali" 
                       />
                    </div>
-                   <div className="absolute -bottom-8 -right-8 w-24 h-24 md:w-32 md:h-32 bg-indigo-600 rounded-full flex items-center justify-center shadow-2xl animate-bounce-slow z-20 border-8 border-slate-900 group-hover:scale-110 transition-all duration-500">
-                      <i className="fas fa-bolt-lightning text-white text-3xl md:text-4xl"></i>
-                   </div>
                  </div>
 
-                 <div className="space-y-12 md:space-y-16 text-center lg:text-left flex-1 w-full overflow-hidden">
-                   <div className="space-y-6">
-                     <span className="inline-block text-indigo-400 text-[11px] font-black uppercase tracking-[0.8em]">Developer</span>
-                     {/* FLUID FONT SIZE ENSURES FULL NAME ON ONE LINE WITHOUT TRUNCATION */}
-                     <h2 className="font-black text-white serif-text tracking-tighter leading-none whitespace-nowrap overflow-visible text-[clamp(1.5rem,5.5vw,4.5rem)]">
+                 <div className="space-y-10 md:space-y-12 text-center lg:text-left flex-1 w-full overflow-hidden">
+                   <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                     <span className="inline-block text-indigo-400 text-[10px] font-black uppercase tracking-[0.6em]">Developer</span>
+                     {/* REFINED RESPONSIVE TYPOGRAPHY: ALI NOW FITS PERFECTLY ON ONE LINE */}
+                     <h2 className="font-black text-white serif-text tracking-tighter leading-none whitespace-nowrap overflow-visible text-[clamp(1.5rem,5.2vw,3.6rem)]">
                        Sayed Mohsin Ali
                      </h2>
-                     <div className="h-1 w-24 bg-indigo-600 rounded-full mx-auto lg:mx-0"></div>
+                     <div className="h-1 w-20 bg-indigo-600 rounded-full mx-auto lg:mx-0"></div>
                    </div>
                    
-                   <p className="text-xl md:text-3xl text-slate-300 font-medium serif-text italic leading-relaxed max-w-3xl mx-auto lg:mx-0">
-                     "Every line of code in AiPen is crafted to bridge the gap between creative thought and digital realization. We are defining a new era of professional literary intelligence."
+                   <p className="text-lg md:text-2xl text-slate-300 font-medium serif-text italic leading-relaxed max-w-2xl mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                     "Every line of code in AiPen is crafted to bridge the gap between creative thought and digital realization."
                    </p>
                    
-                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 md:gap-12 pt-4">
+                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 md:gap-10 pt-2 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
                       {[
                         { label: 'Intelligence', val: 'Gemini 3.0' },
                         { label: 'Architecture', val: 'Elite UI/UX' },
                         { label: 'Engineering', val: 'React / TS' }
                       ].map(item => (
-                        <div key={item.label} className="space-y-2">
-                           <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{item.label}</div>
-                           <div className="text-xl md:text-2xl font-black text-white serif-text tracking-tight">{item.val}</div>
+                        <div key={item.label} className="space-y-1">
+                           <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{item.label}</div>
+                           <div className="text-lg md:text-xl font-black text-white serif-text tracking-tight">{item.val}</div>
                         </div>
                       ))}
                    </div>
 
-                   <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-8">
-                      <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" className="px-10 py-5 bg-white text-slate-900 rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:bg-indigo-50 hover:scale-105 transition-all flex items-center gap-3 shadow-2xl">
-                        <i className="fab fa-linkedin-in"></i> LinkedIn
+                   {/* KILLER LEVEL SOCIAL ANIMATIONS */}
+                   <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-6 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+                      <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" rel="noopener noreferrer" 
+                        className="group relative px-8 py-4 bg-white text-slate-900 rounded-[18px] font-black text-[9px] uppercase tracking-widest hover:text-white transition-all duration-500 flex items-center gap-3 shadow-xl overflow-hidden hover:scale-105 active:scale-95"
+                      >
+                        <div className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+                        <i className="fab fa-linkedin-in relative z-10 group-hover:rotate-[360deg] transition-transform duration-700"></i>
+                        <span className="relative z-10">LinkedIn</span>
                       </a>
-                      <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" className="px-10 py-5 bg-slate-800 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:bg-slate-700 hover:scale-105 transition-all flex items-center gap-3 border border-white/5">
-                        <i className="fab fa-github"></i> Developer Profile
+                      
+                      <a href="https://github.com/gforg5" target="_blank" rel="noopener noreferrer" 
+                        className="group relative px-8 py-4 bg-slate-800 text-white rounded-[18px] font-black text-[9px] uppercase tracking-widest transition-all duration-500 flex items-center gap-3 border border-white/5 overflow-hidden hover:scale-105 active:scale-95"
+                      >
+                        <div className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+                        <i className="fab fa-github relative z-10 group-hover:rotate-[360deg] transition-transform duration-700"></i>
+                        <span className="relative z-10">Profile</span>
                       </a>
                    </div>
                  </div>
@@ -611,35 +616,35 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.ABOUT && (
-          <div className="w-full max-w-5xl px-6 py-12 md:py-24 animate-in fade-in duration-1000 flex flex-col items-center">
-            <div className="self-start mb-12">
-               <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-100 transition-all shadow-sm">
+          <div className="w-full max-w-5xl px-6 py-10 md:py-16 animate-in fade-in duration-1000 flex flex-col items-center">
+            <div className="self-start mb-10">
+               <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-5 py-2.5 bg-slate-50 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-100 transition-all shadow-sm">
                  <i className="fas fa-arrow-left"></i> Studio
                </button>
             </div>
-            <div className="space-y-16 md:space-y-24 text-center">
-              <div className="space-y-4">
-                <span className="text-indigo-600 text-[11px] font-black uppercase tracking-[0.5em]">The Core Engine</span>
-                <h2 className="text-5xl md:text-8xl font-black serif-text text-slate-900 tracking-tighter leading-none">Intelligent Synthesis</h2>
+            <div className="space-y-12 md:space-y-20 text-center">
+              <div className="space-y-3">
+                <span className="text-indigo-600 text-[10px] font-black uppercase tracking-[0.5em]">The Core Engine</span>
+                <h2 className="text-4xl md:text-7xl font-black serif-text text-slate-900 tracking-tighter leading-none">Intelligent Synthesis</h2>
               </div>
               
-              <div className="grid md:grid-cols-2 gap-12 md:gap-20 text-left">
-                 <div className="space-y-8 p-10 bg-slate-50 rounded-[48px] border border-slate-100">
-                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm">
-                       <i className="fas fa-microchip text-2xl"></i>
+              <div className="grid md:grid-cols-2 gap-8 md:gap-12 text-left">
+                 <div className="space-y-6 p-8 bg-slate-50 rounded-[32px] border border-slate-100 shadow-sm">
+                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+                       <i className="fas fa-microchip text-xl"></i>
                     </div>
-                    <h3 className="text-3xl font-black text-slate-900 serif-text">Neural Drafting</h3>
-                    <p className="text-slate-500 text-lg leading-relaxed serif-text">
-                      AiPen leverages the latest Gemini models to maintain narrative consistency over hundreds of pages, ensuring your manuscript flows with professional integrity.
+                    <h3 className="text-2xl font-black text-slate-900 serif-text">Neural Drafting</h3>
+                    <p className="text-slate-500 text-base leading-relaxed serif-text">
+                      AiPen leverages the latest Gemini models to maintain narrative consistency over hundreds of pages.
                     </p>
                  </div>
-                 <div className="space-y-8 p-10 bg-slate-900 rounded-[48px] text-white">
-                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-indigo-400">
-                       <i className="fas fa-image text-2xl"></i>
+                 <div className="space-y-6 p-8 bg-slate-900 rounded-[32px] text-white">
+                    <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-indigo-400">
+                       <i className="fas fa-image text-xl"></i>
                     </div>
-                    <h3 className="text-3xl font-black serif-text">Visual Context</h3>
-                    <p className="text-slate-400 text-lg leading-relaxed serif-text">
-                      Automated visual materialization integrates high-fidelity illustrations directly into the text, conceptualized from the narrative context itself.
+                    <h3 className="text-2xl font-black serif-text">Visual Context</h3>
+                    <p className="text-slate-400 text-base leading-relaxed serif-text">
+                      Automated visual materialization integrates high-fidelity illustrations directly into the text.
                     </p>
                  </div>
               </div>
@@ -648,49 +653,54 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.OUTLINING && (
-          <div className="w-full max-w-5xl px-6 py-12 md:py-24 animate-in fade-in duration-700 flex flex-col items-center">
-            <div className="self-start mb-12">
-               <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-100 transition-all shadow-sm">
+          <div className="w-full max-w-5xl px-6 py-10 md:py-16 animate-in fade-in duration-700 flex flex-col items-center">
+            <div className="self-start mb-8">
+               <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-5 py-2.5 bg-slate-50 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-100 transition-all shadow-sm">
                  <i className="fas fa-arrow-left"></i> Adjust Inputs
                </button>
             </div>
-            <div className="w-full space-y-16">
-               <div className="text-center space-y-4">
-                  <span className="text-indigo-600 text-[10px] font-black uppercase tracking-[0.4em]">Structure Verified</span>
-                  <h2 className="text-5xl md:text-7xl font-black serif-text text-slate-900 tracking-tight">Project Hierarchy</h2>
+            <div className="w-full space-y-12">
+               <div className="text-center space-y-3">
+                  <span className="text-indigo-600 text-[9px] font-black uppercase tracking-[0.4em]">Structure Verified</span>
+                  <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight">Project Hierarchy</h2>
                </div>
-               <div className="grid gap-6 w-full max-w-4xl mx-auto">
+               <div className="grid gap-4 w-full max-w-4xl mx-auto">
                   {currentBook?.outline.map((ch, idx) => (
-                    <div key={idx} className="bg-slate-50/50 p-8 rounded-[32px] border border-slate-100 flex gap-8 items-center group hover:bg-white hover:shadow-xl hover:border-indigo-100 transition-all">
-                       <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-3xl font-black text-slate-200 serif-text group-hover:text-indigo-600 transition-all shadow-sm">
+                    <div key={idx} className="bg-slate-50/50 p-6 rounded-[24px] border border-slate-100 flex gap-6 items-center group hover:bg-white hover:shadow-lg transition-all">
+                       <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-2xl font-black text-slate-200 serif-text group-hover:text-indigo-600 transition-all shadow-sm">
                          {String(idx + 1).padStart(2, '0')}
                        </div>
-                       <div className="flex-1 space-y-2">
-                          <div className="font-black text-slate-900 text-xl md:text-2xl serif-text leading-tight">{ch.title}</div>
-                          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">{ch.subsections.join(' • ')}</div>
+                       <div className="flex-1 space-y-1">
+                          <div className="font-black text-slate-900 text-xl serif-text leading-tight">{ch.title}</div>
+                          <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">{ch.subsections.join(' • ')}</div>
                        </div>
                     </div>
                   ))}
+               </div>
+               <div className="flex flex-col items-center gap-6 pt-6">
+                  <button onClick={startWriting} className="w-full max-w-lg py-5 bg-slate-900 text-white rounded-[24px] font-black shadow-xl hover:scale-[1.02] transition-transform uppercase text-[10px] tracking-[0.4em]">
+                    Commence Full Drafting
+                  </button>
                </div>
             </div>
           </div>
         )}
 
         {step === AppState.WRITING && (
-           <div className="py-24 md:py-40 text-center animate-in fade-in duration-700 max-w-4xl w-full flex flex-col items-center px-6">
-              <div className="relative mb-16">
-                 <div className="w-32 h-32 md:w-48 md:h-48 border-[8px] md:border-[12px] border-slate-50 border-t-indigo-600 rounded-full animate-spin mx-auto shadow-2xl"></div>
+           <div className="py-20 md:py-32 text-center animate-in fade-in duration-700 max-w-4xl w-full flex flex-col items-center px-6">
+              <div className="relative mb-12">
+                 <div className="w-24 h-24 md:w-36 md:h-36 border-[6px] md:border-[10px] border-slate-50 border-t-indigo-600 rounded-full animate-spin mx-auto shadow-xl"></div>
                  <div className="absolute inset-0 flex items-center justify-center">
-                    <i className="fas fa-feather-pointed text-slate-200 text-3xl md:text-5xl animate-pulse"></i>
+                    <i className="fas fa-feather-pointed text-slate-200 text-2xl md:text-4xl animate-pulse"></i>
                  </div>
               </div>
-              <div className="space-y-8">
-                 <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight">Drafting Manuscript</h2>
+              <div className="space-y-6">
+                 <h2 className="text-3xl md:text-5xl font-black serif-text text-slate-900 tracking-tight">Drafting Manuscript</h2>
                  <div className="flex flex-col gap-2">
-                    <p className="text-slate-400 font-black uppercase tracking-[0.4em] text-xs">{progress.message}</p>
-                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Constructing Chapter {progress.currentChapter} / {progress.totalChapters}</span>
+                    <p className="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px]">{progress.message}</p>
+                    <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">Constructing {progress.currentChapter} / {progress.totalChapters}</span>
                  </div>
-                 <div className="w-full max-w-md h-2 bg-slate-50 rounded-full mx-auto overflow-hidden border border-slate-100">
+                 <div className="w-full max-w-sm h-1.5 bg-slate-50 rounded-full mx-auto overflow-hidden border border-slate-100">
                     <div className="h-full bg-indigo-600 transition-all duration-1000 ease-out" style={{ width: `${(progress.currentChapter / progress.totalChapters) * 100}%` }}></div>
                  </div>
               </div>
@@ -699,62 +709,62 @@ const App: React.FC = () => {
 
         {step === AppState.VIEWER && currentBook && (
           <div className="w-full animate-in fade-in duration-1000 flex flex-col items-center px-4 md:px-0">
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 md:left-14 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-4 md:gap-8 z-50 no-print bg-white/70 backdrop-blur-2xl p-4 md:p-0 rounded-[32px] md:bg-transparent shadow-2xl md:shadow-none border border-slate-200 md:border-none">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-14 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-4 z-50 no-print bg-white/70 backdrop-blur-2xl p-3 md:p-0 rounded-[28px] md:bg-transparent shadow-xl md:shadow-none border border-slate-200 md:border-none">
                <button 
                 disabled={activeChapterIndex === 0}
                 onClick={() => { setActiveChapterIndex(p => p - 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-                className="w-14 h-14 md:w-24 md:h-24 bg-white border border-slate-200 shadow-xl rounded-full flex items-center justify-center text-slate-300 hover:text-indigo-600 hover:scale-105 transition-all disabled:opacity-20"
+                className="w-12 h-12 md:w-20 md:h-20 bg-white border border-slate-200 shadow-lg rounded-full flex items-center justify-center text-slate-300 hover:text-indigo-600 hover:scale-105 transition-all disabled:opacity-20"
                >
-                 <i className="fas fa-chevron-left md:text-2xl"></i>
+                 <i className="fas fa-chevron-left md:text-xl"></i>
                </button>
                <button 
                 disabled={activeChapterIndex === currentBook.outline.length - 1}
                 onClick={() => { setActiveChapterIndex(p => p + 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-                className="w-14 h-14 md:w-24 md:h-24 bg-slate-900 shadow-xl rounded-full flex items-center justify-center text-white hover:scale-105 transition-all disabled:opacity-20"
+                className="w-12 h-12 md:w-20 md:h-20 bg-slate-900 shadow-lg rounded-full flex items-center justify-center text-white hover:scale-105 transition-all disabled:opacity-20"
                >
-                 <i className="fas fa-chevron-right md:text-2xl"></i>
+                 <i className="fas fa-chevron-right md:text-xl"></i>
                </button>
             </div>
             
-            <div className="w-full max-w-5xl space-y-8 md:space-y-12 mb-32 md:mb-40">
-               <div className="flex flex-col sm:flex-row justify-between items-center gap-6 bg-white p-6 md:p-10 rounded-[40px] md:rounded-[56px] border border-slate-100 shadow-sm no-print">
-                 <div className="flex gap-10 md:gap-14 px-4">
+            <div className="w-full max-w-5xl space-y-6 md:space-y-10 mb-24 md:mb-32">
+               <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-5 md:p-8 rounded-[32px] md:rounded-[48px] border border-slate-100 shadow-sm no-print">
+                 <div className="flex gap-8 md:gap-12 px-2">
                     <div className="text-center">
-                       <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Lexicon</div>
-                       <div className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">{totalWords.toLocaleString()}</div>
+                       <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Lexicon</div>
+                       <div className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">{totalWords.toLocaleString()}</div>
                     </div>
                     <div className="text-center">
-                       <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Progress</div>
-                       <div className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">{activeChapterIndex + 1}/{currentBook.outline.length}</div>
+                       <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Progress</div>
+                       <div className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">{activeChapterIndex + 1}/{currentBook.outline.length}</div>
                     </div>
                  </div>
-                 <div className="flex gap-4 w-full sm:w-auto">
-                    <button onClick={() => setStep(AppState.HOME)} className="flex-1 sm:flex-none px-8 py-5 bg-slate-50 text-slate-900 rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all">
-                       Back to Home
+                 <div className="flex gap-3 w-full sm:w-auto">
+                    <button onClick={() => setStep(AppState.HOME)} className="flex-1 sm:flex-none px-6 py-4 bg-slate-50 text-slate-900 rounded-[18px] font-black text-[9px] uppercase tracking-widest hover:bg-slate-100 transition-all">
+                       Home
                     </button>
-                    <button onClick={() => window.print()} className="flex-1 sm:flex-none px-8 py-5 bg-slate-900 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl flex items-center justify-center gap-3">
-                       <i className="fas fa-file-pdf"></i> Export PDF
+                    <button onClick={() => window.print()} className="flex-1 sm:flex-none px-6 py-4 bg-slate-900 text-white rounded-[18px] font-black text-[9px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2">
+                       <i className="fas fa-file-pdf"></i> PDF
                     </button>
                  </div>
                </div>
                
-               <div className="book-page p-10 md:p-24 lg:p-36 relative overflow-hidden flex flex-col rounded-[64px] min-h-[90vh]">
+               <div className="book-page p-8 md:p-16 lg:p-24 relative overflow-hidden flex flex-col rounded-[48px] min-h-[85vh]">
                   <div className="flex-1 prose prose-slate max-w-none">
                     {activeChapterIndex === 0 && (
-                      <div className="mb-24 md:mb-40 text-center border-b border-slate-50 pb-20 md:pb-32 space-y-10 md:space-y-14">
-                         <div className="text-[10px] md:text-[11px] font-black tracking-[0.5em] uppercase text-indigo-500">Premium Publication Draft</div>
-                         <h1 className="text-5xl md:text-8xl lg:text-9xl font-black text-slate-900 leading-none serif-text tracking-tighter">{currentBook.title}</h1>
-                         <div className="text-2xl md:text-4xl text-slate-400 italic serif-text font-medium">{currentBook.author}</div>
+                      <div className="mb-16 md:mb-24 text-center border-b border-slate-50 pb-12 md:pb-20 space-y-8">
+                         <div className="text-[9px] md:text-[10px] font-black tracking-[0.5em] uppercase text-indigo-500">Publication Draft</div>
+                         <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-slate-900 leading-none serif-text tracking-tighter">{currentBook.title}</h1>
+                         <div className="text-xl md:text-3xl text-slate-400 italic serif-text font-medium">{currentBook.author}</div>
                       </div>
                     )}
-                    <div className="flex justify-between items-end mb-12 md:mb-20 border-b border-slate-50 pb-6 no-print">
-                       <h2 className="text-2xl md:text-4xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Chapter {activeChapterIndex + 1}</h2>
-                       <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Architectural Draft v1.0</div>
+                    <div className="flex justify-between items-end mb-10 border-b border-slate-50 pb-4 no-print">
+                       <h2 className="text-xl md:text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Chapter {activeChapterIndex + 1}</h2>
+                       <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">v1.0 Draft</div>
                     </div>
-                    <div className="chapter-body text-xl md:text-2xl lg:text-3xl text-slate-700 leading-[1.8] md:leading-[1.9] serif-text">
+                    <div className="chapter-body text-lg md:text-xl lg:text-2xl text-slate-700 leading-[1.7] serif-text">
                       {(currentBook.outline[activeChapterIndex].content || '').split(/\[VISUAL:\s*(.*?)\s*\]/g).map((part, i) => {
                         if (i % 2 === 0) {
-                          return <div key={i} dangerouslySetInnerHTML={{ __html: marked.parse(part) as string }} className="mb-8 md:mb-12" />;
+                          return <div key={i} dangerouslySetInnerHTML={{ __html: marked.parse(part) as string }} className="mb-6 md:mb-10" />;
                         } else {
                           return <VisualPlaceholder 
                             key={i} 

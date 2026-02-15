@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AiPen - Professional AI Book Studio</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234F46E5'><path d='M12.5 22h-1c-1.1 0-2-.9-2-2v-4.5l-4.7-4.7c-.4-.4-.4-1 0-1.4l7.1-7.1c.4-.4 1-.4 1.4 0l7.1 7.1c.4.4.4 1 0 1.4l-4.7 4.7V20c0 1.1-.9 2-2 2h-1.2zm-2.5-8.5v6.5h4v-6.5l-2-2-2 2z'/></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000000'><path d='M12.5 22h-1c-1.1 0-2-.9-2-2v-4.5l-4.7-4.7c-.4-.4-.4-1 0-1.4l7.1-7.1c.4-.4 1-.4 1.4 0l7.1 7.1c.4.4.4 1 0 1.4l-4.7 4.7V20c0 1.1-.9 2-2 2h-1.2zm-2.5-8.5v6.5h4v-6.5l-2-2-2 2z'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
@@ -53,6 +52,18 @@
           50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
         }
         .animate-bounce-slow { animation: bounce-slow 3s infinite; }
+
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
+
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
 
         .transition-transform { transition-duration: 400ms; }
     </style>
