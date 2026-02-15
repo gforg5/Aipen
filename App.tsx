@@ -6,8 +6,16 @@ import { marked } from 'marked';
 
 const PROJECTS_STORAGE_KEY = 'aipen_projects_v8';
 
-// The global aistudio interface is pre-defined in the environment as AIStudio.
-// Manual declaration is removed to resolve "All declarations of 'aistudio' must have identical modifiers" errors.
+// TypeScript declaration to fix TS2339 and TS2717: Matching global AIStudio interface and modifiers
+declare global {
+  interface AIStudio {
+    hasSelectedApiKey: () => Promise<boolean>;
+    openSelectKey: () => Promise<void>;
+  }
+  interface Window {
+    aistudio?: AIStudio;
+  }
+}
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -203,11 +211,11 @@ const App: React.FC = () => {
 
   const ensureApiKey = async () => {
     try {
-        if (typeof window.aistudio !== 'undefined') {
+        if (typeof window.aistudio !== 'undefined' && window.aistudio) {
             const hasKey = await window.aistudio.hasSelectedApiKey();
             if (!hasKey) {
                 await window.aistudio.openSelectKey();
-                return true; // Proceed assuming selection success
+                return true; 
             }
         }
     } catch (e) {
@@ -246,8 +254,10 @@ const App: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes("entity was not found")) {
-          await window.aistudio.openSelectKey();
-          setError("Session expired. Please re-select your API key.");
+          if (typeof window.aistudio !== 'undefined' && window.aistudio) {
+              await window.aistudio.openSelectKey();
+              setError("Session expired. Please re-select your API key.");
+          }
       } else {
           setError(err.message || "Engine latency detected (Outline phase).");
       }
@@ -300,8 +310,10 @@ const App: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes("entity was not found")) {
-          await window.aistudio.openSelectKey();
-          setError("Session expired. Please re-select your API key.");
+          if (typeof window.aistudio !== 'undefined' && window.aistudio) {
+              await window.aistudio.openSelectKey();
+              setError("Session expired. Please re-select your API key.");
+          }
       } else {
           setError(err.message || "Authoring process interrupted.");
       }
@@ -430,7 +442,6 @@ const App: React.FC = () => {
                 
                 <div className="lg:col-span-5 hidden lg:block relative">
                    <div className="absolute -inset-20 bg-indigo-500/5 blur-[120px] rounded-full"></div>
-                   {/* Clean Image Container with internal zoom clipping */}
                    <div className="relative z-10 killer-perspective">
                      <div className="killer-tilt rounded-[48px] shadow-3xl rotate-2 aspect-[4/5] w-full cursor-pointer bg-slate-100 border-8 border-white">
                        <img 
@@ -500,7 +511,6 @@ const App: React.FC = () => {
                <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-start relative z-10">
                  
                  <div className="w-64 h-64 md:w-96 md:h-96 shrink-0 killer-perspective group relative">
-                   {/* High Intensity Killer Glow Aura Layer */}
                    <div className="absolute inset-0 bg-indigo-500/50 blur-[100px] rounded-full animate-pulse scale-75 opacity-70"></div>
                    
                    <div className="killer-tilt killer-glow-aura rounded-[60px] cursor-pointer bg-slate-800 h-full w-full relative z-10">
