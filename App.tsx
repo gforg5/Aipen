@@ -3,7 +3,7 @@ import { AppState, Book, Chapter, GenerationProgress, BookHistoryEvent } from '.
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-const PROJECTS_STORAGE_KEY = 'aipen_projects_v6';
+const PROJECTS_STORAGE_KEY = 'aipen_projects_v7';
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -117,8 +117,8 @@ const Footer: React.FC = () => (
         </div>
         <div className="flex flex-col text-perspective-container">
           <span className="serif-text font-black text-slate-900 text-xl tracking-tight animate-wobble-killer text-3d-hover">AiPen Studio</span>
-          {/* Subtle zoom animation on footer text */}
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:scale-105 hover:text-indigo-600 transition-all duration-500 opacity-80 cursor-default">Premium AI Engineering</span>
+          {/* Subtle little zoom for the text */}
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:scale-[1.05] hover:text-indigo-600 transition-all duration-500 opacity-80 cursor-default">Premium AI Engineering</span>
         </div>
       </div>
       
@@ -144,8 +144,8 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
       try {
           const imgB64 = await geminiService.generateChapterImage(desc, genre);
           onReplace(desc, imgB64);
-      } catch (e) {
-          setError("Materialization failed.");
+      } catch (e: any) {
+          setError(e.message || "Materialization failed.");
           setLoading(false);
       }
   }
@@ -224,7 +224,7 @@ const App: React.FC = () => {
       setStep(AppState.OUTLINING);
     } catch (err: any) {
       console.error(err);
-      setError("Engine latency detected (Outline phase).");
+      setError(err.message || "Engine latency detected (Outline phase).");
     } finally {
       setLoading(false);
     }
@@ -270,7 +270,7 @@ const App: React.FC = () => {
       setStep(AppState.VIEWER);
     } catch (err: any) {
       console.error(err);
-      setError("Authoring process interrupted.");
+      setError(err.message || "Authoring process interrupted.");
     } finally {
       setLoading(false);
     }
@@ -343,7 +343,7 @@ const App: React.FC = () => {
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full animate-float">
                       <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
                       <div className="text-perspective-container">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v6.0 High-Fidelity Engine</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v7.0 Master Engine</span>
                       </div>
                     </div>
                     <div className="text-perspective-container block w-full">
@@ -396,9 +396,9 @@ const App: React.FC = () => {
                 
                 <div className="lg:col-span-5 hidden lg:block relative">
                    <div className="absolute -inset-20 bg-indigo-500/5 blur-[120px] rounded-full"></div>
-                   {/* Main Hero Image - Pro Balanced Aspect (4:5) with Internal Zoom */}
+                   {/* Clean Image Container with internal zoom clipping */}
                    <div className="relative z-10 killer-perspective">
-                     <div className="killer-tilt rounded-[48px] shadow-3xl rotate-2 aspect-[4/5] w-full cursor-pointer bg-slate-100">
+                     <div className="killer-tilt rounded-[48px] shadow-3xl rotate-2 aspect-[4/5] w-full cursor-pointer bg-slate-100 border-8 border-white">
                        <img 
                          src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200" 
                          className="grayscale brightness-110 h-full w-full object-cover" 
@@ -466,8 +466,8 @@ const App: React.FC = () => {
                <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-start relative z-10">
                  
                  <div className="w-64 h-64 md:w-96 md:h-96 shrink-0 killer-perspective group relative">
-                   {/* Killer Level Glow Aura */}
-                   <div className="absolute inset-0 bg-indigo-500/40 blur-[80px] rounded-full animate-pulse scale-75"></div>
+                   {/* High Intensity Killer Glow Aura Layer */}
+                   <div className="absolute inset-0 bg-indigo-500/50 blur-[100px] rounded-full animate-pulse scale-75 opacity-70"></div>
                    
                    <div className="killer-tilt killer-glow-aura rounded-[60px] cursor-pointer bg-slate-800 h-full w-full relative z-10">
                       <img src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" className="grayscale brightness-110 h-full w-full object-cover rounded-[56px]" />
