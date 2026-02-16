@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { AppState, Book, Chapter, GenerationProgress } from './types.ts';
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-const PROJECTS_STORAGE_KEY = 'AIPEN_PRO_STORAGE_FINAL';
+const PROJECTS_STORAGE_KEY = 'AIPEN_V10_PRO_STABLE_ARCHIVE';
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -121,9 +121,6 @@ const Footer: React.FC = () => (
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:scale-[1.05] hover:text-indigo-600 transition-all duration-500 opacity-80 cursor-default">Premium AI Engineering</span>
         </div>
       </div>
-      <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
-        https://aipen-ten.vercel.app/
-      </div>
       <div className="flex gap-4">
         <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
           <i className="fab fa-linkedin-in text-lg"></i>
@@ -200,8 +197,14 @@ const App: React.FC = () => {
     message: ''
   });
 
-  // Safe Persistence
+  const isInitialMount = useRef(true);
+
+  // Robust Persistence: Only save if NOT initial mount OR if projects is not empty
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
   }, [projects]);
 
@@ -211,7 +214,7 @@ const App: React.FC = () => {
       const hasKey = await aistudio.hasSelectedApiKey();
       if (!hasKey) {
         await aistudio.openSelectKey();
-        return false; // Stop execution until they select a key
+        return false;
       }
     }
     return true;
@@ -223,8 +226,12 @@ const App: React.FC = () => {
       return;
     }
     
-    const keyOk = await ensureApiKey();
-    if (!keyOk) return;
+    // Check key before starting
+    const keyReady = await ensureApiKey();
+    if (!keyReady) {
+      setError("Please select an API Key via the popup to continue.");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -247,13 +254,7 @@ const App: React.FC = () => {
       setProjects(prev => [newBook, ...prev]);
       setStep(AppState.OUTLINING);
     } catch (err: any) {
-      if (err.message === "MISSING_API_KEY") {
-        const aistudio = (window as any).aistudio;
-        if (aistudio) await aistudio.openSelectKey();
-        setError("Please select your API Key to continue.");
-      } else {
-        setError(err.message || "Engine detection failure. Please retry.");
-      }
+      setError(err.message || "Failed to start architecture. Check your API key.");
     } finally {
       setLoading(false);
     }
@@ -265,7 +266,8 @@ const App: React.FC = () => {
     setLoading(true);
     setError(null);
     
-    await ensureApiKey();
+    const keyReady = await ensureApiKey();
+    if (!keyReady) return;
 
     const updatedOutline = [...currentBook.outline];
     setProgress({ currentChapter: 0, totalChapters: updatedOutline.length, message: 'Initializing neural cores...' });
@@ -301,7 +303,7 @@ const App: React.FC = () => {
       });
       setStep(AppState.VIEWER);
     } catch (err: any) {
-      setError(err.message || "Authoring process interrupted.");
+      setError("Authoring process interrupted. Please retry.");
     } finally {
       setLoading(false);
     }
@@ -327,7 +329,7 @@ const App: React.FC = () => {
     const chapter = { ...updatedOutline[chapterIndex] };
     
     const regex = new RegExp(`\\[VISUAL:\\s*${desc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\]`);
-    const imageHtml = `\n\n<div class="my-16 text-center animate-scale-up group"><img src="${base64}" alt="${desc}" class="rounded-[32px] shadow-2xl mx-auto w-full border-[8px] border-white group-hover:scale-105 transition-all duration-1000" /><p class="mt-6 text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Neural Materialization</p></div>\n\n`;
+    const imageHtml = `\n\n<div class="my-16 text-center animate-scale-up group no-print"><img src="${base64}" alt="${desc}" class="rounded-[32px] shadow-2xl mx-auto w-full border-[8px] border-white group-hover:scale-105 transition-all duration-1000" /><p class="mt-6 text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Neural Materialization</p></div>\n\n`;
     
     chapter.content = (chapter.content || '').replace(regex, imageHtml);
     updatedOutline[chapterIndex] = chapter;
@@ -374,7 +376,7 @@ const App: React.FC = () => {
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full animate-float">
                       <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
                       <div className="text-perspective-container">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v9.0 Master Studio</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v10.0 Pro Studio</span>
                       </div>
                     </div>
                     <div className="text-perspective-container block w-full">
@@ -383,32 +385,29 @@ const App: React.FC = () => {
                         <span className="text-indigo-600 italic animate-text-float">Masterpieces.</span>
                       </h2>
                     </div>
-                    <p className="text-lg md:text-xl text-slate-400 font-medium max-w-xl serif-text leading-relaxed">
-                      Translate abstract concepts into professional-grade books with high-fidelity semantic drafting.
-                    </p>
                   </div>
 
-                  <div className="bg-white p-8 md:p-10 rounded-[40px] border border-slate-100 shadow-2xl space-y-8 hover:shadow-indigo-50 transition-all duration-700">
+                  <div className="bg-white p-8 md:p-10 rounded-[40px] border border-slate-100 shadow-2xl space-y-8">
                     <div className="grid sm:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Book Title</label>
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="The Quantum Divide"
-                          className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none transition-all placeholder:text-slate-200 font-black serif-text text-xl" />
+                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="AgenticAi"
+                          className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none font-black serif-text text-xl" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Author Name</label>
                         <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="SMA"
-                          className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none transition-all font-bold text-sm" />
+                          className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none font-bold text-sm" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Target Pages (50-500)</label>
                         <input type="number" min="50" max="500" value={length} onChange={(e) => setLength(Number(e.target.value))}
-                          className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none transition-all font-bold text-sm" />
+                          className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 font-bold text-sm" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Category (Genre)</label>
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Genre</label>
                         <select value={genre} onChange={(e) => setGenre(e.target.value)}
-                          className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none transition-all font-bold text-sm">
+                          className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 font-bold text-sm">
                            <option>Business/Self-Help</option>
                            <option>Science Fiction</option>
                            <option>History/Biography</option>
@@ -418,22 +417,17 @@ const App: React.FC = () => {
                       </div>
                     </div>
                     
-                    <button onClick={startOutline} disabled={loading} className="w-full py-6 bg-slate-900 text-white rounded-2xl font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl disabled:bg-slate-200 uppercase text-[11px] tracking-[0.3em] flex items-center justify-center gap-4 btn-killer">
+                    <button onClick={startOutline} disabled={loading} className="w-full py-6 bg-slate-900 text-white rounded-2xl font-black transition-all shadow-xl disabled:bg-slate-200 uppercase text-[11px] tracking-[0.3em] flex items-center justify-center gap-4 btn-killer">
                       {loading ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-layer-group"></i>}
                       {loading ? "Constructing..." : "Architect Book"}
                     </button>
                   </div>
                 </div>
                 
-                <div className="lg:col-span-5 hidden lg:block relative">
-                   <div className="absolute -inset-20 bg-indigo-500/5 blur-[120px] rounded-full"></div>
-                   <div className="relative z-10 killer-perspective">
-                     <div className="killer-tilt rounded-[48px] shadow-3xl rotate-2 aspect-[4/5] w-full cursor-pointer bg-slate-100 border-8 border-white">
-                       <img 
-                         src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200" 
-                         className="grayscale brightness-110 h-full w-full object-cover" 
-                         alt="Hero Book Illustration"
-                       />
+                <div className="lg:col-span-5 hidden lg:block">
+                   <div className="killer-perspective">
+                     <div className="killer-tilt rounded-[48px] shadow-3xl rotate-2 aspect-[4/5] w-full bg-slate-100 border-8 border-white">
+                       <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200" alt="Hero" />
                      </div>
                    </div>
                 </div>
@@ -442,44 +436,30 @@ const App: React.FC = () => {
 
             <section className="bg-slate-50 py-20 px-6">
               <div className="max-w-7xl mx-auto w-full">
-                <div className="mb-12 space-y-2 text-center md:text-left flex flex-col">
-                  <div className="text-perspective-container">
-                    <h3 className="text-3xl md:text-5xl font-black text-slate-900 serif-text tracking-tight animate-wobble-killer text-3d-hover">Your Books History</h3>
-                  </div>
-                  <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest animate-text-float">Archive Vault</span>
+                <div className="mb-12">
+                   <h3 className="text-3xl font-black text-slate-900 serif-text tracking-tight uppercase">Archive Vault</h3>
                 </div>
 
                 {projects.length === 0 ? (
-                  <div className="py-20 bg-white border border-slate-100 rounded-[48px] flex flex-col items-center text-center shadow-sm hover-card group">
-                     <i className="fas fa-folder-open text-6xl text-slate-100 mb-8 transition-transform group-hover:scale-125 duration-500"></i>
-                     <h4 className="text-xl font-black text-slate-300 serif-text uppercase tracking-widest animate-text-float">No books archived</h4>
+                  <div className="py-20 bg-white border border-slate-100 rounded-[48px] flex flex-col items-center text-center">
+                     <i className="fas fa-folder-open text-6xl text-slate-100 mb-8"></i>
+                     <h4 className="text-xl font-black text-slate-300 serif-text uppercase tracking-widest">No books archived</h4>
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {projects.map(project => {
-                      const dateObj = new Date(project.createdAt);
-                      const dateStr = isNaN(dateObj.getTime()) ? 'Recent Blueprint' : dateObj.toLocaleDateString();
-                      return (
-                        <div key={project.id} onClick={() => loadProject(project)} className="group bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover-card cursor-pointer flex flex-col relative overflow-hidden">
-                          <button onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }} className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center z-10">
-                            <i className="fas fa-trash-alt text-xs"></i>
-                          </button>
-                          <div className="space-y-6">
-                             <div className="w-14 h-14 bg-slate-50 text-slate-900 rounded-2xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all duration-500 shadow-sm">
-                                <i className="fas fa-book text-2xl"></i>
-                             </div>
-                             <div className="space-y-2">
-                                <h4 className="text-2xl font-black text-slate-900 serif-text line-clamp-1 group-hover:text-indigo-600 transition-colors animate-text-float">{project.title}</h4>
-                                <div className="flex items-center gap-3 text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                                   <span className="text-indigo-500">{project.genre}</span>
-                                   <span>•</span>
-                                   <span>{dateStr}</span>
-                                </div>
-                             </div>
-                          </div>
+                    {projects.map(project => (
+                      <div key={project.id} onClick={() => loadProject(project)} className="group bg-white p-8 rounded-[32px] border border-slate-100 hover-card cursor-pointer relative">
+                        <button onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }} className="absolute top-6 right-6 text-slate-300 hover:text-red-600 z-10">
+                          <i className="fas fa-trash-alt"></i>
+                        </button>
+                        <div className="space-y-6">
+                           <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all">
+                              <i className="fas fa-book text-2xl"></i>
+                           </div>
+                           <h4 className="text-2xl font-black text-slate-900 serif-text line-clamp-1">{project.title}</h4>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -487,102 +467,56 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {step === AppState.DEVELOPER && (
-          <div className="w-full max-w-6xl px-6 py-16 flex flex-col items-center animate-fade-in-up no-print">
-             <div className="self-start mb-10">
-                <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-900 hover:text-white hover:scale-110 active:scale-95 transition-all shadow-xl">
-                  <i className="fas fa-arrow-left"></i> Home
-                </button>
-             </div>
-             
-             <div className="w-full bg-slate-900 rounded-[64px] p-10 md:p-20 relative overflow-hidden shadow-3xl">
-               <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent"></div>
-               <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-start relative z-10">
-                 
-                 <div className="w-64 h-64 md:w-96 md:h-96 shrink-0 killer-perspective group relative">
-                   <div className="absolute inset-0 bg-indigo-500/50 blur-[100px] rounded-full animate-pulse scale-75 opacity-70"></div>
-                   
-                   <div className="killer-tilt killer-glow-aura rounded-[60px] cursor-pointer bg-slate-800 h-full w-full relative z-10">
-                      <img src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" className="grayscale brightness-110 h-full w-full object-cover rounded-[56px]" />
-                   </div>
-                 </div>
-
-                 <div className="space-y-12 text-center lg:text-left flex-1">
-                   <div className="space-y-4">
-                     <span className="text-indigo-400 text-[11px] font-black uppercase tracking-[1em] animate-text-float">Architect</span>
-                     <div className="text-perspective-container block w-full">
-                       <h2 className="font-black text-white serif-text tracking-tighter leading-none whitespace-nowrap text-[clamp(2.3rem,6.5vw,4.8rem)] overflow-hidden animate-reveal-skew text-3d-hover">
-                         <span className="animate-wobble-killer">Sayed Mohsin Ali</span>
-                       </h2>
-                     </div>
-                     <div className="h-1.5 w-24 bg-indigo-600 rounded-full mx-auto lg:mx-0 animate-pulse"></div>
-                   </div>
-                   
-                   <p className="text-xl md:text-3xl text-slate-300 font-medium serif-text italic leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                     "We engineer high-fidelity tools that harness intelligence to empower storytellers through premium digital experiences."
-                   </p>
-                   
-                   <div className="flex flex-wrap gap-6 justify-center lg:justify-start pt-8">
-                      <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" className="group relative px-10 py-5 bg-white text-slate-900 rounded-[24px] font-black text-[11px] uppercase tracking-widest hover:text-white transition-all duration-500 overflow-hidden hover:scale-110 shadow-3xl">
-                        <div className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
-                        <div className="relative z-10 flex items-center gap-3">
-                          <i className="fab fa-linkedin-in group-hover:rotate-[360deg] transition-transform duration-1000"></i> LinkedIn Connect
-                        </div>
-                      </a>
-                      
-                      <a href="https://github.com/gforg5" target="_blank" className="group relative px-10 py-5 bg-slate-800 text-white rounded-[24px] font-black text-[11px] uppercase tracking-widest transition-all duration-500 overflow-hidden hover:scale-110 border border-white/10 shadow-3xl">
-                        <div className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
-                        <div className="relative z-10 flex items-center gap-3">
-                          <i className="fab fa-github group-hover:rotate-[360deg] transition-transform duration-1000"></i> GitHub Profile
-                        </div>
-                      </a>
-                   </div>
-                 </div>
-               </div>
+        {step === AppState.OUTLINING && (
+          <div className="py-20 animate-fade-in-up w-full max-w-4xl px-6">
+             <div className="bg-white p-12 rounded-[48px] border border-slate-100 shadow-2xl space-y-10">
+                <h2 className="text-4xl font-black serif-text text-slate-900 uppercase">Architecture Blueprint</h2>
+                <div className="space-y-4">
+                   {currentBook?.outline.map((ch, idx) => (
+                      <div key={ch.id} className="p-6 bg-slate-50 rounded-2xl flex justify-between items-center border border-slate-100">
+                         <span className="font-bold text-slate-900">{idx + 1}. {ch.title}</span>
+                         <span className="text-[10px] font-black uppercase text-indigo-500">{ch.subsections.length} Sub-segments</span>
+                      </div>
+                   ))}
+                </div>
+                <button onClick={startWriting} className="w-full py-6 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all">Start Drafting Process</button>
              </div>
           </div>
         )}
 
         {step === AppState.WRITING && (
-           <div className="py-40 text-center animate-fade-in-up flex flex-col items-center w-full px-6 no-print">
-              <div className="relative mb-20 animate-float">
-                 <div className="w-32 h-32 md:w-48 md:h-48 border-[12px] border-slate-50 border-t-indigo-600 rounded-full animate-spin shadow-2xl"></div>
+           <div className="py-40 text-center animate-fade-in-up flex flex-col items-center w-full px-6">
+              <div className="relative mb-20">
+                 <div className="w-32 h-32 md:w-48 md:h-48 border-[12px] border-slate-50 border-t-indigo-600 rounded-full animate-spin"></div>
                  <div className="absolute inset-0 flex items-center justify-center">
-                    <i className="fas fa-feather-pointed text-slate-200 text-4xl md:text-6xl animate-pulse"></i>
+                    <i className="fas fa-feather-pointed text-slate-200 text-4xl animate-pulse"></i>
                  </div>
               </div>
-              <div className="space-y-8">
-                 <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight block">
-                   Synthesizing Book
-                 </h2>
-                 <div className="h-px w-20 bg-slate-100 mx-auto"></div>
-                 <p className="text-indigo-600 font-bold serif-text text-xl animate-fade-in-up block italic tracking-wide">
-                   {progress.message}
-                 </p>
-                 <div className="w-full max-w-md h-2 bg-slate-50 rounded-full mx-auto overflow-hidden border border-slate-100 shadow-inner mt-8">
-                    <div className="h-full bg-indigo-600 transition-all duration-1000" style={{ width: `${(progress.currentChapter / progress.totalChapters) * 100}%` }}></div>
-                 </div>
+              <h2 className="text-4xl font-black serif-text text-slate-900 uppercase mb-4">Synthesizing Manuscript</h2>
+              <p className="text-indigo-600 font-bold italic text-xl">{progress.message}</p>
+              <div className="w-full max-w-md h-2 bg-slate-50 rounded-full mx-auto overflow-hidden border border-slate-100 mt-8">
+                 <div className="h-full bg-indigo-600 transition-all duration-1000" style={{ width: `${(progress.currentChapter / progress.totalChapters) * 100}%` }}></div>
               </div>
            </div>
         )}
 
         {step === AppState.VIEWER && currentBook && (
           <>
-            {/* --- STRICT PRINT RENDER --- */}
+            {/* --- STRICT PRINT VIEW --- */}
             <div className="hidden print:block w-full">
-              {/* PAGE 1: EXCLUSIVE COVER */}
+              {/* PAGE 1: COVER */}
               <div className="book-page flex flex-col items-center justify-center text-center" style={{ breakAfter: 'page' }}>
                  <div className="text-[20px] font-black tracking-[1.6em] uppercase text-slate-900 mb-20">O F F I C I A L  B O O K</div>
-                 <h1 className="text-8xl font-black text-slate-900 serif-text leading-tight mb-8">AgenticAi</h1>
+                 <h1 className="text-9xl font-black text-slate-900 serif-text leading-tight mb-8">AgenticAi</h1>
                  <div className="text-4xl text-slate-600 italic serif-text font-medium">Writer: {currentBook.author}</div>
               </div>
               
-              {/* PAGE 2+: SEGMENTS */}
+              {/* PAGE 2+: CONTENT */}
               {currentBook.outline.map((ch, idx) => (
                 <div key={ch.id} className="book-page">
                   <div className="flex justify-between items-center mb-20 border-b border-slate-100 pb-8">
                     <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {idx + 1}</h2>
-                    <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">AiPen Studio v9.0</div>
+                    <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">AiPen Studio v10.0</div>
                   </div>
                   <div className="prose-book">
                      <div dangerouslySetInnerHTML={{ __html: marked.parse(ch.content || '') as string }} />
@@ -593,20 +527,20 @@ const App: React.FC = () => {
 
             {/* --- PREMIUM SCREEN VIEW --- */}
             <div className="w-full animate-fade-in-up flex flex-col items-center px-6 no-print">
-              <div className="fixed bottom-10 left-1/2 -translate-x-1/2 md:left-20 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-8 z-50 bg-white/80 backdrop-blur-2xl p-4 md:p-0 rounded-[40px] shadow-3xl md:shadow-none border border-slate-200 md:border-none">
+              <div className="fixed bottom-10 left-1/2 -translate-x-1/2 md:left-20 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-8 z-50 bg-white/80 backdrop-blur-2xl p-4 rounded-[40px] shadow-3xl">
                  <button 
                   disabled={activeChapterIndex === 0}
                   onClick={() => { setActiveChapterIndex(p => p - 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-                  className="w-16 h-16 md:w-24 md:h-24 bg-white border border-slate-200 shadow-2xl rounded-full flex items-center justify-center text-slate-300 hover:text-indigo-600 hover:scale-110 active:scale-90 transition-all disabled:opacity-20"
+                  className="w-16 h-16 md:w-24 md:h-24 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-300 hover:text-indigo-600 transition-all disabled:opacity-20"
                  >
-                   <i className="fas fa-chevron-left md:text-2xl"></i>
+                   <i className="fas fa-chevron-left"></i>
                  </button>
                  <button 
                   disabled={activeChapterIndex === currentBook.outline.length - 1}
                   onClick={() => { setActiveChapterIndex(p => p + 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-                  className="w-16 h-16 md:w-24 md:h-24 bg-slate-900 shadow-2xl rounded-full flex items-center justify-center text-white hover:scale-110 active:scale-90 transition-all disabled:opacity-20"
+                  className="w-16 h-16 md:w-24 md:h-24 bg-slate-900 rounded-full flex items-center justify-center text-white transition-all disabled:opacity-20"
                  >
-                   <i className="fas fa-chevron-right md:text-2xl"></i>
+                   <i className="fas fa-chevron-right"></i>
                  </button>
               </div>
               
@@ -623,23 +557,23 @@ const App: React.FC = () => {
                       </div>
                    </div>
                    <div className="flex gap-4 w-full sm:w-auto">
-                      <button onClick={() => setStep(AppState.HOME)} className="flex-1 sm:flex-none px-8 py-5 bg-slate-50 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all">Home</button>
-                      <button onClick={() => window.print()} className="flex-1 sm:flex-none px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl flex items-center gap-3"><i className="fas fa-file-pdf"></i> Export Full Book</button>
+                      <button onClick={() => setStep(AppState.HOME)} className="px-8 py-5 bg-slate-50 text-slate-900 rounded-2xl font-black text-[10px] uppercase">Home</button>
+                      <button onClick={() => window.print()} className="px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase shadow-xl flex items-center gap-3"><i className="fas fa-file-pdf"></i> Export Manuscript</button>
                    </div>
                  </div>
                  
-                 <div className="bg-white rounded-[64px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] min-h-screen p-12 md:p-32">
+                 <div className="bg-white rounded-[64px] shadow-2xl p-12 md:p-32">
                     {activeChapterIndex === 0 && (
                       <div className="mb-40 text-center border-b border-slate-50 pb-32 space-y-12">
-                         <div className="text-[16px] font-black tracking-[1.4em] uppercase text-slate-900 mb-16">O F F I C I A L  B O O K</div>
-                         <h1 className="text-7xl md:text-9xl font-black text-slate-900 serif-text leading-tight tracking-tighter mb-4">AgenticAi</h1>
+                         <div className="text-[16px] font-black tracking-[1.4em] uppercase text-slate-900">O F F I C I A L  B O O K</div>
+                         <h1 className="text-7xl md:text-9xl font-black text-slate-900 serif-text leading-tight tracking-tighter">AgenticAi</h1>
                          <div className="text-3xl text-slate-400 italic serif-text font-medium block">Writer: {currentBook.author}</div>
                       </div>
                     )}
                     
                     <div className="flex justify-between items-center mb-16 border-b border-slate-50 pb-8">
-                       <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {activeChapterIndex + 1}</h2>
-                       <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">Architect Draft v1.2</div>
+                       <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase">Segment {activeChapterIndex + 1}</h2>
+                       <div className="text-[11px] font-black text-slate-300 uppercase italic">Architect Draft v10.0</div>
                     </div>
                     
                     <div className="prose-book">
@@ -660,6 +594,26 @@ const App: React.FC = () => {
               </div>
             </div>
           </>
+        )}
+
+        {step === AppState.DEVELOPER && (
+           <div className="w-full max-w-4xl px-6 py-20 animate-fade-in-up">
+              <div className="bg-slate-900 p-12 md:p-20 rounded-[64px] shadow-3xl text-center space-y-12 relative overflow-hidden">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-slate-900"></div>
+                 <div className="w-48 h-48 mx-auto rounded-full border-8 border-indigo-600 overflow-hidden shadow-2xl">
+                    <img src="https://github.com/gforg5/Nano-Lens/blob/main/1769069098374.png?raw=true" className="w-full h-full object-cover grayscale" />
+                 </div>
+                 <div className="space-y-4">
+                    <h2 className="text-5xl font-black text-white serif-text uppercase">Sayed Mohsin Ali</h2>
+                    <p className="text-indigo-400 text-xl font-medium italic serif-text">"Engineering the future of digital manuscripts."</p>
+                 </div>
+                 <div className="flex justify-center gap-6">
+                    <a href="https://github.com/gforg5" target="_blank" className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition-all"><i className="fab fa-github text-2xl"></i></a>
+                    <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition-all"><i className="fab fa-linkedin-in text-2xl"></i></a>
+                 </div>
+                 <button onClick={() => setStep(AppState.HOME)} className="px-10 py-5 bg-white text-slate-900 rounded-2xl font-black uppercase text-[10px] tracking-widest">Back to Studio</button>
+              </div>
+           </div>
         )}
       </main>
 

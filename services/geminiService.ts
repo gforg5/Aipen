@@ -2,17 +2,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Chapter } from "../types.ts";
 
-const getAI = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("MISSING_API_KEY");
-  }
-  return new GoogleGenAI({ apiKey });
-};
-
 export const geminiService = {
   async generateOutline(title: string, genre: string, length: number): Promise<Chapter[]> {
-    const ai = getAI();
+    // Initialize inside the method to ensure process.env.API_KEY is available
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const chapterCount = Math.max(5, Math.min(30, Math.ceil(length / 10)));
     
     try {
@@ -51,14 +44,13 @@ export const geminiService = {
         status: 'pending'
       }));
     } catch (e: any) {
-      if (e.message === "MISSING_API_KEY") throw e;
       console.error("Outline Generation Failure:", e);
-      throw new Error(`Architectural failure: ${e.message || "Unknown engine error"}`);
+      throw new Error(`Engine Error: ${e.message || "Unknown error"}`);
     }
   },
 
   async generateChapterContent(bookTitle: string, genre: string, chapter: Chapter): Promise<string> {
-    const ai = getAI();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -71,8 +63,7 @@ export const geminiService = {
       2. Insert [VISUAL: Description of illustration] placeholders where visual context adds value.
       3. Write a deep, detailed segment (at least 1500 words) with multiple paragraphs and sub-headings.
       4. Professional markdown formatting (use ## for subheadings).
-      5. Ensure elite flow and sophisticated vocabulary.
-      6. DO NOT repeat the chapter title at the start. Just start with the prose or a subheading.`,
+      5. DO NOT repeat the chapter title at the start. Just start with the prose.`,
       config: {
          thinkingConfig: { thinkingBudget: 16000 }
       }
@@ -82,7 +73,7 @@ export const geminiService = {
   },
 
   async generateChapterImage(desc: string, genre: string): Promise<string> {
-    const ai = getAI();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `A professional, highly aesthetic book illustration for a ${genre} book. Subject: ${desc}. Elite visual quality, no text, cinematic lighting.`;
     
     const response = await ai.models.generateContent({
@@ -102,8 +93,7 @@ export const geminiService = {
   },
 
   async generateCovers(title: string, genre: string): Promise<string[]> {
-    const ai = getAI();
-    const covers: string[] = [];
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `A premium high-fidelity book cover for "${title}". Genre: ${genre}. Highly artistic, Amazon KDP ready, minimal text.`;
     
     try {
@@ -117,13 +107,12 @@ export const geminiService = {
 
       for (const part of response.candidates?.[0]?.content?.parts || []) {
         if (part.inlineData) {
-          covers.push(`data:image/png;base64,${part.inlineData.data}`);
-          break;
+          return [`data:image/png;base64,${part.inlineData.data}`];
         }
       }
     } catch (e) {
       console.warn("Cover gen latency:", e);
     }
-    return covers;
+    return [];
   }
 };
