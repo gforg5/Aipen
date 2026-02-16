@@ -4,8 +4,7 @@ import { AppState, Book, Chapter, GenerationProgress } from './types.ts';
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-// Permanent storage key
-const PROJECTS_STORAGE_KEY = 'AIPEN_STUDIO_V10_STABLE';
+const PROJECTS_STORAGE_KEY = 'AIPEN_PRO_STORAGE_FINAL';
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -122,7 +121,9 @@ const Footer: React.FC = () => (
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:scale-[1.05] hover:text-indigo-600 transition-all duration-500 opacity-80 cursor-default">Premium AI Engineering</span>
         </div>
       </div>
-      
+      <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+        https://aipen-ten.vercel.app/
+      </div>
       <div className="flex gap-4">
         <a href="https://www.linkedin.com/in/sayed-mohsin-ali-924b8926b" target="_blank" className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
           <i className="fab fa-linkedin-in text-lg"></i>
@@ -178,7 +179,6 @@ const App: React.FC = () => {
       const saved = localStorage.getItem(PROJECTS_STORAGE_KEY);
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
-      console.error("Storage Recovery Failure:", e);
       return [];
     }
   });
@@ -191,7 +191,7 @@ const App: React.FC = () => {
   const [title, setTitle] = useState('');
   const [genre, setGenre] = useState('Business/Self-Help');
   const [length, setLength] = useState(100);
-  const [author, setAuthor] = useState('');
+  const [author, setAuthor] = useState('SMA');
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
   
   const [progress, setProgress] = useState<GenerationProgress>({
@@ -200,22 +200,19 @@ const App: React.FC = () => {
     message: ''
   });
 
-  // Simplified and robust persistence
+  // Safe Persistence
   useEffect(() => {
     localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
   }, [projects]);
 
   const ensureApiKey = async () => {
-    try {
-        const aistudio = (window as any).aistudio;
-        if (aistudio) {
-            const hasKey = await aistudio.hasSelectedApiKey();
-            if (!hasKey) {
-                await aistudio.openSelectKey();
-            }
-        }
-    } catch (e) {
-        console.warn("Key selection dialog issue:", e);
+    const aistudio = (window as any).aistudio;
+    if (aistudio) {
+      const hasKey = await aistudio.hasSelectedApiKey();
+      if (!hasKey) {
+        await aistudio.openSelectKey();
+        return false; // Stop execution until they select a key
+      }
     }
     return true;
   };
@@ -225,10 +222,12 @@ const App: React.FC = () => {
       setError("Please provide a title to begin.");
       return;
     }
+    
+    const keyOk = await ensureApiKey();
+    if (!keyOk) return;
+
     setLoading(true);
     setError(null);
-
-    await ensureApiKey();
 
     try {
       const outline = await geminiService.generateOutline(title, genre, length);
@@ -248,8 +247,13 @@ const App: React.FC = () => {
       setProjects(prev => [newBook, ...prev]);
       setStep(AppState.OUTLINING);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Engine latency detected. Try again.");
+      if (err.message === "MISSING_API_KEY") {
+        const aistudio = (window as any).aistudio;
+        if (aistudio) await aistudio.openSelectKey();
+        setError("Please select your API Key to continue.");
+      } else {
+        setError(err.message || "Engine detection failure. Please retry.");
+      }
     } finally {
       setLoading(false);
     }
@@ -278,7 +282,7 @@ const App: React.FC = () => {
         const content = await geminiService.generateChapterContent(currentBook.title, currentBook.genre, updatedOutline[i]);
         updatedOutline[i].content = content;
         updatedOutline[i].status = 'completed';
-        updatedOutline[i].wordCount = content.split(/\s+/).length;
+        updatedOutline[i].wordCount = (content || '').split(/\s+/).length;
         
         const partialBook = { ...currentBook, outline: [...updatedOutline] };
         setCurrentBook(partialBook);
@@ -297,7 +301,6 @@ const App: React.FC = () => {
       });
       setStep(AppState.VIEWER);
     } catch (err: any) {
-      console.error(err);
       setError(err.message || "Authoring process interrupted.");
     } finally {
       setLoading(false);
@@ -371,7 +374,7 @@ const App: React.FC = () => {
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full animate-float">
                       <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
                       <div className="text-perspective-container">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v8.0 Master Studio</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v9.0 Master Studio</span>
                       </div>
                     </div>
                     <div className="text-perspective-container block w-full">
@@ -568,19 +571,18 @@ const App: React.FC = () => {
             {/* --- STRICT PRINT RENDER --- */}
             <div className="hidden print:block w-full">
               {/* PAGE 1: EXCLUSIVE COVER */}
-              <div className="book-page flex flex-col items-center justify-center text-center">
-                 <div className="text-[18px] font-black tracking-[1.4em] uppercase text-indigo-500 mb-16">OFFICIAL BOOK</div>
-                 <h1 className="text-9xl font-black text-slate-900 serif-text leading-tight mb-12 px-12">{currentBook.title}</h1>
-                 <div className="w-32 h-1 bg-slate-900/10 mb-12"></div>
-                 <div className="text-5xl text-slate-400 italic serif-text font-medium">Writer: {currentBook.author}</div>
+              <div className="book-page flex flex-col items-center justify-center text-center" style={{ breakAfter: 'page' }}>
+                 <div className="text-[20px] font-black tracking-[1.6em] uppercase text-slate-900 mb-20">O F F I C I A L  B O O K</div>
+                 <h1 className="text-8xl font-black text-slate-900 serif-text leading-tight mb-8">AgenticAi</h1>
+                 <div className="text-4xl text-slate-600 italic serif-text font-medium">Writer: {currentBook.author}</div>
               </div>
               
               {/* PAGE 2+: SEGMENTS */}
               {currentBook.outline.map((ch, idx) => (
                 <div key={ch.id} className="book-page">
-                  <div className="flex justify-between items-center mb-24 border-b border-slate-100 pb-8">
-                    <h2 className="text-4xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {idx + 1}</h2>
-                    <div className="text-[12px] font-black text-slate-300 uppercase tracking-widest italic">AiPen Studio v8.0</div>
+                  <div className="flex justify-between items-center mb-20 border-b border-slate-100 pb-8">
+                    <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {idx + 1}</h2>
+                    <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">AiPen Studio v9.0</div>
                   </div>
                   <div className="prose-book">
                      <div dangerouslySetInnerHTML={{ __html: marked.parse(ch.content || '') as string }} />
@@ -629,15 +631,15 @@ const App: React.FC = () => {
                  <div className="bg-white rounded-[64px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] min-h-screen p-12 md:p-32">
                     {activeChapterIndex === 0 && (
                       <div className="mb-40 text-center border-b border-slate-50 pb-32 space-y-12">
-                         <div className="text-[12px] font-black tracking-[1em] uppercase text-indigo-500">OFFICIAL BOOK</div>
-                         <h1 className="text-6xl md:text-9xl font-black text-slate-900 serif-text leading-tight tracking-tighter">{currentBook.title}</h1>
+                         <div className="text-[16px] font-black tracking-[1.4em] uppercase text-slate-900 mb-16">O F F I C I A L  B O O K</div>
+                         <h1 className="text-7xl md:text-9xl font-black text-slate-900 serif-text leading-tight tracking-tighter mb-4">AgenticAi</h1>
                          <div className="text-3xl text-slate-400 italic serif-text font-medium block">Writer: {currentBook.author}</div>
                       </div>
                     )}
                     
                     <div className="flex justify-between items-center mb-16 border-b border-slate-50 pb-8">
                        <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {activeChapterIndex + 1}</h2>
-                       <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">Draft v1.2</div>
+                       <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">Architect Draft v1.2</div>
                     </div>
                     
                     <div className="prose-book">
