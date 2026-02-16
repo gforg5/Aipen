@@ -6,17 +6,6 @@ import { marked } from 'marked';
 
 const PROJECTS_STORAGE_KEY = 'aipen_projects_v8';
 
-// TypeScript declaration remains for local IDE support, but we use casting for the build
-declare global {
-  interface AIStudio {
-    hasSelectedApiKey: () => Promise<boolean>;
-    openSelectKey: () => Promise<void>;
-  }
-  interface Window {
-    aistudio?: AIStudio;
-  }
-}
-
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
   currentStep: AppState;

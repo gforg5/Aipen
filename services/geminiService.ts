@@ -1,13 +1,17 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Chapter } from "../types.ts";
 
+const getApiKey = () => {
+  // Vite exposes env vars starting with VITE_ to the client
+  return process.env.API_KEY || (import.meta as any).env.VITE_API_KEY;
+};
+
 export const geminiService = {
   async generateOutline(title: string, genre: string, length: number): Promise<Chapter[]> {
-    // Initializing right before the call to ensure fresh API key context
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const chapterCount = Math.max(5, Math.min(30, Math.ceil(length / 10)));
     
-    // Switch to gemini-3-flash-preview for the blueprint phase to avoid timeouts
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `Generate a detailed professional book outline for a ${genre} book titled "${title}". 
@@ -33,7 +37,6 @@ export const geminiService = {
     });
 
     let jsonStr = response.text.trim();
-    // Clean markdown blocks if present
     if (jsonStr.includes('```')) {
       const match = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
       if (match) jsonStr = match[1].trim();
@@ -54,8 +57,7 @@ export const geminiService = {
   },
 
   async generateChapterContent(bookTitle: string, genre: string, chapter: Chapter): Promise<string> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    // Using gemini-3-pro-preview for world-class narrative synthesis
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
       contents: `You are a world-class professional author. Write high-fidelity, comprehensive content for Chapter: "${chapter.title}" 
@@ -68,7 +70,7 @@ export const geminiService = {
       3. Write at least 800 words for this segment to ensure depth.
       4. Professional markdown formatting.`,
       config: {
-        thinkingConfig: { thinkingBudget: 12000 } // High reasoning for depth
+        thinkingConfig: { thinkingBudget: 12000 }
       }
     });
 
@@ -76,7 +78,7 @@ export const geminiService = {
   },
 
   async generateChapterImage(desc: string, genre: string): Promise<string> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const prompt = `A professional, highly aesthetic book illustration for a ${genre} book. Subject: ${desc}. Elite visual quality, no text.`;
     
     const response = await ai.models.generateContent({
@@ -96,7 +98,7 @@ export const geminiService = {
   },
 
   async generateCovers(title: string, genre: string): Promise<string[]> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const covers: string[] = [];
     const prompt = `A premium high-fidelity book cover for "${title}". Genre: ${genre}. Highly artistic, Amazon KDP ready.`;
     
