@@ -216,7 +216,7 @@ const App: React.FC = () => {
 
   const startOutline = async () => {
     if (!title) {
-      setError("Provide a manuscript title.");
+      setError("Provide a book title.");
       return;
     }
     setLoading(true);
@@ -250,7 +250,7 @@ const App: React.FC = () => {
               setError("Session expired. Please re-select your API key.");
           }
       } else {
-          setError(err.message || "Engine latency detected (Outline phase).");
+          setError(err.message || "Engine latency detected (Outline phase). Try again in a few seconds.");
       }
     } finally {
       setLoading(false);
@@ -307,7 +307,7 @@ const App: React.FC = () => {
               setError("Session expired. Please re-select your API key.");
           }
       } else {
-          setError(err.message || "Authoring process interrupted.");
+          setError(err.message || "Authoring process interrupted by quota limit. Retrying might help.");
       }
     } finally {
       setLoading(false);
@@ -391,14 +391,14 @@ const App: React.FC = () => {
                       </h2>
                     </div>
                     <p className="text-lg md:text-xl text-slate-400 font-medium max-w-xl serif-text leading-relaxed">
-                      Translate abstract concepts into professional-grade manuscripts with high-fidelity semantic drafting.
+                      Translate abstract concepts into professional-grade books with high-fidelity semantic drafting.
                     </p>
                   </div>
 
                   <div className="bg-white p-8 md:p-10 rounded-[40px] border border-slate-100 shadow-2xl space-y-8 hover:shadow-indigo-50 transition-all duration-700">
                     <div className="grid sm:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Manuscript Title</label>
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Book Title</label>
                         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="The Quantum Divide"
                           className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none transition-all placeholder:text-slate-200 font-black serif-text text-xl" />
                       </div>
@@ -427,7 +427,7 @@ const App: React.FC = () => {
                     
                     <button onClick={startOutline} disabled={loading} className="w-full py-6 bg-slate-900 text-white rounded-2xl font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl disabled:bg-slate-200 uppercase text-[11px] tracking-[0.3em] flex items-center justify-center gap-4 btn-killer">
                       {loading ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-layer-group"></i>}
-                      {loading ? "Constructing..." : "Architect Manuscript"}
+                      {loading ? "Constructing..." : "Architect Book"}
                     </button>
                   </div>
                 </div>
@@ -439,7 +439,7 @@ const App: React.FC = () => {
                        <img 
                          src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=1200" 
                          className="grayscale brightness-110 h-full w-full object-cover" 
-                         alt="Hero Manuscript Illustration"
+                         alt="Hero Book Illustration"
                        />
                      </div>
                    </div>
@@ -449,17 +449,17 @@ const App: React.FC = () => {
 
             <section className="bg-slate-50 py-20 px-6">
               <div className="max-w-7xl mx-auto w-full">
-                <div className="mb-12 space-y-2 text-center md:text-left">
-                  <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest animate-text-float">Archive Vault</span>
-                  <div className="text-perspective-container">
+                <div className="mb-12 space-y-2 text-center md:text-left flex flex-col">
+                  <div className="text-perspective-container order-1">
                     <h3 className="text-3xl md:text-5xl font-black text-slate-900 serif-text tracking-tight animate-wobble-killer text-3d-hover">Your Books History</h3>
                   </div>
+                  <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest animate-text-float order-2">Archive Vault</span>
                 </div>
 
                 {projects.length === 0 ? (
                   <div className="py-20 bg-white border border-slate-100 rounded-[48px] flex flex-col items-center text-center shadow-sm hover-card group">
                      <i className="fas fa-folder-open text-6xl text-slate-100 mb-8 transition-transform group-hover:scale-125 duration-500"></i>
-                     <h4 className="text-xl font-black text-slate-300 serif-text uppercase tracking-widest animate-text-float">No manuscripts archived</h4>
+                     <h4 className="text-xl font-black text-slate-300 serif-text uppercase tracking-widest animate-text-float">No books archived</h4>
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -567,7 +567,7 @@ const App: React.FC = () => {
                      <i className="fas fa-image text-3xl"></i>
                   </div>
                   <h3 className="text-3xl font-black serif-text text-white animate-text-float">Visual Synthesis</h3>
-                  <p className="text-slate-400 text-lg leading-relaxed">High-fidelity materialization of visual content derived directly from the semantic core of the manuscript.</p>
+                  <p className="text-slate-400 text-lg leading-relaxed">High-fidelity materialization of visual content derived directly from the semantic core of the book.</p>
                </div>
             </div>
           </div>
@@ -584,7 +584,7 @@ const App: React.FC = () => {
                <div className="text-center space-y-4">
                   <span className="text-indigo-600 text-[10px] font-black uppercase tracking-[0.4em] animate-text-float">Structure Verified</span>
                   <div className="text-perspective-container">
-                    <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight animate-wobble-killer text-3d-hover">Manuscript Architecture</h2>
+                    <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight animate-wobble-killer text-3d-hover">Book Architecture</h2>
                   </div>
                </div>
                <div className="grid gap-4 w-full max-w-4xl mx-auto">
@@ -619,7 +619,7 @@ const App: React.FC = () => {
               </div>
               <div className="space-y-6">
                  <div className="text-perspective-container">
-                   <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight animate-wobble-killer text-3d-hover">Synthesizing Manuscript</h2>
+                   <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight animate-wobble-killer text-3d-hover">Synthesizing Book</h2>
                  </div>
                  <p className="text-slate-400 font-black uppercase tracking-[0.6em] text-[11px] animate-text-float">{progress.message}</p>
                  <div className="w-full max-w-md h-2 bg-slate-50 rounded-full mx-auto overflow-hidden border border-slate-100 shadow-inner">
@@ -670,7 +670,7 @@ const App: React.FC = () => {
                   <div className="prose prose-slate max-w-none">
                     {activeChapterIndex === 0 && (
                       <div className="mb-40 text-center border-b border-slate-50 pb-32 space-y-12">
-                         <div className="text-[11px] font-black tracking-[0.8em] uppercase text-indigo-500 animate-text-float">Official Manuscript</div>
+                         <div className="text-[11px] font-black tracking-[0.8em] uppercase text-indigo-500 animate-text-float">Official Book</div>
                          <div className="text-perspective-container">
                           <h1 className="text-6xl md:text-9xl font-black text-slate-900 leading-[0.85] serif-text tracking-tighter animate-reveal-skew animate-wobble-killer text-3d-hover">{currentBook.title}</h1>
                          </div>

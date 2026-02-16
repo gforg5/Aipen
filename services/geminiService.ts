@@ -4,6 +4,7 @@ import { Chapter } from "../types.ts";
 
 const getApiKey = () => {
   // Vite exposes env vars starting with VITE_ to the client
+  // Check process.env first (injected by system), then VITE_ prefix for Vercel
   return process.env.API_KEY || (import.meta as any).env.VITE_API_KEY;
 };
 
@@ -12,6 +13,7 @@ export const geminiService = {
     const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const chapterCount = Math.max(5, Math.min(30, Math.ceil(length / 10)));
     
+    // Using gemini-3-flash-preview for outline as it has higher free-tier limits
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `Generate a detailed professional book outline for a ${genre} book titled "${title}". 
@@ -58,8 +60,11 @@ export const geminiService = {
 
   async generateChapterContent(bookTitle: string, genre: string, chapter: Chapter): Promise<string> {
     const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    
+    // Switched to gemini-3-flash-preview to avoid 429 quota 0 errors often seen with 3-pro preview
+    // Flash models are faster and have higher free-tier thresholds
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3-flash-preview',
       contents: `You are a world-class professional author. Write high-fidelity, comprehensive content for Chapter: "${chapter.title}" 
       of the book "${bookTitle}" (Genre: ${genre}). 
       Discuss topics: ${chapter.subsections.join(', ')}. 
@@ -67,10 +72,11 @@ export const geminiService = {
       RULES:
       1. Rich, elite literary style.
       2. Insert [VISUAL: Description of illustration] placeholders where appropriate.
-      3. Write at least 800 words for this segment to ensure depth.
+      3. Write a deep, detailed segment for this section.
       4. Professional markdown formatting.`,
       config: {
-        thinkingConfig: { thinkingBudget: 12000 }
+         // Flash-preview supports thinking but we keep budget reasonable for speed
+         thinkingConfig: { thinkingBudget: 8000 }
       }
     });
 
