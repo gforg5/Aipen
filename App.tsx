@@ -4,7 +4,7 @@ import { AppState, Book, Chapter, GenerationProgress } from './types.ts';
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-const PROJECTS_STORAGE_KEY = 'aipen_projects_v8';
+const PROJECTS_STORAGE_KEY = 'aipen_projects_v9';
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -234,7 +234,7 @@ const App: React.FC = () => {
         targetLength: length,
         outline,
         covers: [],
-        createdAt: new Date().toLocaleString(),
+        createdAt: new Date().toISOString(), // Use ISO for reliable parsing
         history: [{ timestamp: new Date().toLocaleTimeString(), event: 'Core blueprint initialized.', version: 1 }]
       };
       
@@ -373,7 +373,7 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.HOME && (
-          <div className="w-full animate-fade-in-up">
+          <div className="w-full animate-fade-in-up no-print">
             <section className="px-6 py-12 md:py-24 max-w-7xl mx-auto w-full">
               <div className="grid lg:grid-cols-12 gap-12 items-center">
                 <div className="lg:col-span-7 space-y-10">
@@ -450,10 +450,10 @@ const App: React.FC = () => {
             <section className="bg-slate-50 py-20 px-6">
               <div className="max-w-7xl mx-auto w-full">
                 <div className="mb-12 space-y-2 text-center md:text-left flex flex-col">
-                  <div className="text-perspective-container order-1">
+                  <div className="text-perspective-container">
                     <h3 className="text-3xl md:text-5xl font-black text-slate-900 serif-text tracking-tight animate-wobble-killer text-3d-hover">Your Books History</h3>
                   </div>
-                  <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest animate-text-float order-2">Archive Vault</span>
+                  <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest animate-text-float">Archive Vault</span>
                 </div>
 
                 {projects.length === 0 ? (
@@ -491,7 +491,7 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.DEVELOPER && (
-          <div className="w-full max-w-6xl px-6 py-16 flex flex-col items-center animate-fade-in-up">
+          <div className="w-full max-w-6xl px-6 py-16 flex flex-col items-center animate-fade-in-up no-print">
              <div className="self-start mb-10">
                 <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-900 hover:text-white hover:scale-110 active:scale-95 transition-all shadow-xl">
                   <i className="fas fa-arrow-left"></i> Home
@@ -547,7 +547,7 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.ABOUT && (
-          <div className="w-full max-w-5xl px-6 py-20 text-center space-y-24 animate-fade-in-up">
+          <div className="w-full max-w-5xl px-6 py-20 text-center space-y-24 animate-fade-in-up no-print">
             <div className="space-y-4">
               <span className="text-indigo-600 text-[11px] font-black uppercase tracking-[0.6em] animate-text-float">Core Intelligence</span>
               <div className="text-perspective-container">
@@ -574,7 +574,7 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.OUTLINING && (
-          <div className="w-full max-w-5xl px-6 py-16 animate-fade-in-up flex flex-col items-center">
+          <div className="w-full max-w-5xl px-6 py-16 animate-fade-in-up flex flex-col items-center no-print">
             <div className="self-start mb-8">
                <button onClick={() => setStep(AppState.HOME)} className="flex items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-100 transition-all">
                  <i className="fas fa-arrow-left"></i> Adjust Blueprint
@@ -610,18 +610,21 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.WRITING && (
-           <div className="py-40 text-center animate-fade-in-up flex flex-col items-center w-full px-6">
+           <div className="py-40 text-center animate-fade-in-up flex flex-col items-center w-full px-6 no-print">
               <div className="relative mb-20 animate-float">
                  <div className="w-32 h-32 md:w-48 md:h-48 border-[12px] border-slate-50 border-t-indigo-600 rounded-full animate-spin shadow-2xl"></div>
                  <div className="absolute inset-0 flex items-center justify-center">
                     <i className="fas fa-feather-pointed text-slate-200 text-4xl md:text-6xl animate-pulse"></i>
                  </div>
               </div>
-              <div className="space-y-6">
+              <div className="space-y-8">
                  <div className="text-perspective-container">
                    <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight animate-wobble-killer text-3d-hover">Synthesizing Book</h2>
                  </div>
-                 <p className="text-slate-400 font-black uppercase tracking-[0.6em] text-[11px] animate-text-float">{progress.message}</p>
+                 <div className="space-y-2">
+                    <p className="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px] animate-text-float block">Neural drafting in progress</p>
+                    <p className="text-indigo-600 font-bold serif-text text-xl animate-fade-in-up block italic">{progress.message}</p>
+                 </div>
                  <div className="w-full max-w-md h-2 bg-slate-50 rounded-full mx-auto overflow-hidden border border-slate-100 shadow-inner">
                     <div className="h-full bg-indigo-600 transition-all duration-1000" style={{ width: `${(progress.currentChapter / progress.totalChapters) * 100}%` }}></div>
                  </div>
@@ -630,77 +633,102 @@ const App: React.FC = () => {
         )}
 
         {step === AppState.VIEWER && currentBook && (
-          <div className="w-full animate-fade-in-up flex flex-col items-center px-6">
-            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 md:left-20 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-8 z-50 no-print bg-white/80 backdrop-blur-2xl p-4 md:p-0 rounded-[40px] shadow-3xl md:shadow-none border border-slate-200 md:border-none">
-               <button 
-                disabled={activeChapterIndex === 0}
-                onClick={() => { setActiveChapterIndex(p => p - 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-                className="w-16 h-16 md:w-24 md:h-24 bg-white border border-slate-200 shadow-2xl rounded-full flex items-center justify-center text-slate-300 hover:text-indigo-600 hover:scale-110 active:scale-90 transition-all disabled:opacity-20"
-               >
-                 <i className="fas fa-chevron-left md:text-2xl"></i>
-               </button>
-               <button 
-                disabled={activeChapterIndex === currentBook.outline.length - 1}
-                onClick={() => { setActiveChapterIndex(p => p + 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-                className="w-16 h-16 md:w-24 md:h-24 bg-slate-900 shadow-2xl rounded-full flex items-center justify-center text-white hover:scale-110 active:scale-90 transition-all disabled:opacity-20"
-               >
-                 <i className="fas fa-chevron-right md:text-2xl"></i>
-               </button>
-            </div>
-            
-            <div className="w-full max-w-5xl space-y-12 mb-32">
-               <div className="flex flex-col sm:flex-row justify-between items-center gap-8 bg-white p-10 rounded-[40px] border border-slate-100 shadow-sm no-print">
-                 <div className="flex gap-12 text-center md:text-left">
-                    <div>
-                       <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1 animate-text-float">Lexicon</div>
-                       <div className="text-3xl font-black text-slate-900 tracking-tighter">{totalWords.toLocaleString()}</div>
+          <>
+            {/* FULL BOOK RENDER FOR PRINTING ONLY */}
+            <div className="hidden print:block w-full">
+              {currentBook.outline.map((ch, idx) => (
+                <div key={ch.id} className="book-page p-32 bg-white min-h-screen page-break-after-always">
+                  {idx === 0 && (
+                    <div className="mb-40 text-center border-b border-slate-100 pb-32 space-y-12">
+                       <div className="text-[14px] font-black tracking-[1em] uppercase text-indigo-500">Official Book</div>
+                       <h1 className="text-8xl font-black text-slate-900 leading-[0.85] serif-text tracking-tighter">{currentBook.title}</h1>
+                       <div className="text-4xl text-slate-400 italic serif-text font-medium">Writer: {currentBook.author}</div>
                     </div>
-                    <div>
-                       <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1 animate-text-float">Segment</div>
-                       <div className="text-3xl font-black text-slate-900 tracking-tighter">{activeChapterIndex + 1}/{currentBook.outline.length}</div>
-                    </div>
-                 </div>
-                 <div className="flex gap-4 w-full sm:w-auto">
-                    <button onClick={() => setStep(AppState.HOME)} className="flex-1 sm:flex-none px-8 py-5 bg-slate-50 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 hover:scale-105 active:scale-95 transition-all">Home</button>
-                    <button onClick={() => window.print()} className="flex-1 sm:flex-none px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-3 btn-killer"><i className="fas fa-file-pdf"></i> Export PDF</button>
-                 </div>
-               </div>
-               
-               <div className="book-page p-12 md:p-32 bg-white rounded-[64px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] min-h-screen">
-                  <div className="prose prose-slate max-w-none">
-                    {activeChapterIndex === 0 && (
-                      <div className="mb-40 text-center border-b border-slate-50 pb-32 space-y-12">
-                         <div className="text-[11px] font-black tracking-[0.8em] uppercase text-indigo-500 animate-text-float">Official Book</div>
-                         <div className="text-perspective-container">
-                          <h1 className="text-6xl md:text-9xl font-black text-slate-900 leading-[0.85] serif-text tracking-tighter animate-reveal-skew animate-wobble-killer text-3d-hover">{currentBook.title}</h1>
-                         </div>
-                         <div className="text-3xl text-slate-400 italic serif-text font-medium animate-text-float">{currentBook.author}</div>
-                      </div>
-                    )}
-                    <div className="flex justify-between items-center mb-16 border-b border-slate-50 pb-8 no-print">
-                       <div className="text-perspective-container">
-                        <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0 animate-wobble-killer text-3d-hover">Segment {activeChapterIndex + 1}</h2>
-                       </div>
-                       <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Architect Draft v1.2</div>
-                    </div>
-                    <div className="chapter-body text-2xl text-slate-700 leading-relaxed serif-text">
-                      {(currentBook.outline[activeChapterIndex].content || '').split(/\[VISUAL:\s*(.*?)\s*\]/g).map((part, i) => {
-                        if (i % 2 === 0) {
-                          return <div key={i} dangerouslySetInnerHTML={{ __html: marked.parse(part) as string }} className="mb-12" />;
-                        } else {
-                          return <VisualPlaceholder 
-                            key={i} 
-                            desc={part} 
-                            genre={currentBook.genre} 
-                            onReplace={(desc, b64) => handleReplaceVisual(desc, b64, activeChapterIndex)} 
-                          />;
-                        }
-                      })}
-                    </div>
+                  )}
+                  <div className="flex justify-between items-center mb-16 border-b border-slate-100 pb-8">
+                    <h2 className="text-4xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {idx + 1}</h2>
+                    <div className="text-[12px] font-black text-slate-300 uppercase tracking-widest">Architect Draft v1.2</div>
                   </div>
-               </div>
+                  <div className="chapter-body text-2xl text-slate-700 leading-relaxed serif-text">
+                     <div dangerouslySetInnerHTML={{ __html: marked.parse(ch.content || '') as string }} />
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+
+            {/* SCREEN VIEW */}
+            <div className="w-full animate-fade-in-up flex flex-col items-center px-6 no-print">
+              <div className="fixed bottom-10 left-1/2 -translate-x-1/2 md:left-20 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-8 z-50 bg-white/80 backdrop-blur-2xl p-4 md:p-0 rounded-[40px] shadow-3xl md:shadow-none border border-slate-200 md:border-none">
+                 <button 
+                  disabled={activeChapterIndex === 0}
+                  onClick={() => { setActiveChapterIndex(p => p - 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                  className="w-16 h-16 md:w-24 md:h-24 bg-white border border-slate-200 shadow-2xl rounded-full flex items-center justify-center text-slate-300 hover:text-indigo-600 hover:scale-110 active:scale-90 transition-all disabled:opacity-20"
+                 >
+                   <i className="fas fa-chevron-left md:text-2xl"></i>
+                 </button>
+                 <button 
+                  disabled={activeChapterIndex === currentBook.outline.length - 1}
+                  onClick={() => { setActiveChapterIndex(p => p + 1); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                  className="w-16 h-16 md:w-24 md:h-24 bg-slate-900 shadow-2xl rounded-full flex items-center justify-center text-white hover:scale-110 active:scale-90 transition-all disabled:opacity-20"
+                 >
+                   <i className="fas fa-chevron-right md:text-2xl"></i>
+                 </button>
+              </div>
+              
+              <div className="w-full max-w-5xl space-y-12 mb-32">
+                 <div className="flex flex-col sm:flex-row justify-between items-center gap-8 bg-white p-10 rounded-[40px] border border-slate-100 shadow-sm">
+                   <div className="flex gap-12 text-center md:text-left">
+                      <div>
+                         <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1 animate-text-float">Lexicon</div>
+                         <div className="text-3xl font-black text-slate-900 tracking-tighter">{totalWords.toLocaleString()}</div>
+                      </div>
+                      <div>
+                         <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1 animate-text-float">Segment</div>
+                         <div className="text-3xl font-black text-slate-900 tracking-tighter">{activeChapterIndex + 1}/{currentBook.outline.length}</div>
+                      </div>
+                   </div>
+                   <div className="flex gap-4 w-full sm:w-auto">
+                      <button onClick={() => setStep(AppState.HOME)} className="flex-1 sm:flex-none px-8 py-5 bg-slate-50 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 hover:scale-105 active:scale-95 transition-all">Home</button>
+                      <button onClick={() => window.print()} className="flex-1 sm:flex-none px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-3 btn-killer"><i className="fas fa-file-pdf"></i> Export Full Book</button>
+                   </div>
+                 </div>
+                 
+                 <div className="book-page p-12 md:p-32 bg-white rounded-[64px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] min-h-screen">
+                    <div className="prose prose-slate max-w-none">
+                      {activeChapterIndex === 0 && (
+                        <div className="mb-40 text-center border-b border-slate-50 pb-32 space-y-12">
+                           <div className="text-[11px] font-black tracking-[0.8em] uppercase text-indigo-500 animate-text-float">Official Book</div>
+                           <div className="text-perspective-container">
+                            <h1 className="text-6xl md:text-9xl font-black text-slate-900 leading-[0.85] serif-text tracking-tighter animate-reveal-skew animate-wobble-killer text-3d-hover">{currentBook.title}</h1>
+                           </div>
+                           <div className="text-3xl text-slate-400 italic serif-text font-medium animate-text-float block">Writer: {currentBook.author}</div>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center mb-16 border-b border-slate-50 pb-8">
+                         <div className="text-perspective-container">
+                          <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0 animate-wobble-killer text-3d-hover">Segment {activeChapterIndex + 1}</h2>
+                         </div>
+                         <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Architect Draft v1.2</div>
+                      </div>
+                      <div className="chapter-body text-2xl text-slate-700 leading-relaxed serif-text">
+                        {(currentBook.outline[activeChapterIndex].content || '').split(/\[VISUAL:\s*(.*?)\s*\]/g).map((part, i) => {
+                          if (i % 2 === 0) {
+                            return <div key={i} dangerouslySetInnerHTML={{ __html: marked.parse(part) as string }} className="mb-12" />;
+                          } else {
+                            return <VisualPlaceholder 
+                              key={i} 
+                              desc={part} 
+                              genre={currentBook.genre} 
+                              onReplace={(desc, b64) => handleReplaceVisual(desc, b64, activeChapterIndex)} 
+                            />;
+                          }
+                        })}
+                      </div>
+                    </div>
+                 </div>
+              </div>
+            </div>
+          </>
         )}
       </main>
 
