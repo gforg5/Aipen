@@ -6,7 +6,7 @@ import { marked } from 'marked';
 
 const PROJECTS_STORAGE_KEY = 'aipen_projects_v8';
 
-// TypeScript declaration to fix TS2339 and TS2717: Matching global AIStudio interface and modifiers
+// TypeScript declaration remains for local IDE support, but we use casting for the build
 declare global {
   interface AIStudio {
     hasSelectedApiKey: () => Promise<boolean>;
@@ -211,10 +211,11 @@ const App: React.FC = () => {
 
   const ensureApiKey = async () => {
     try {
-        if (typeof window.aistudio !== 'undefined' && window.aistudio) {
-            const hasKey = await window.aistudio.hasSelectedApiKey();
+        const aistudio = (window as any).aistudio;
+        if (aistudio) {
+            const hasKey = await aistudio.hasSelectedApiKey();
             if (!hasKey) {
-                await window.aistudio.openSelectKey();
+                await aistudio.openSelectKey();
                 return true; 
             }
         }
@@ -254,8 +255,9 @@ const App: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes("entity was not found")) {
-          if (typeof window.aistudio !== 'undefined' && window.aistudio) {
-              await window.aistudio.openSelectKey();
+          const aistudio = (window as any).aistudio;
+          if (aistudio) {
+              await aistudio.openSelectKey();
               setError("Session expired. Please re-select your API key.");
           }
       } else {
@@ -310,8 +312,9 @@ const App: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes("entity was not found")) {
-          if (typeof window.aistudio !== 'undefined' && window.aistudio) {
-              await window.aistudio.openSelectKey();
+          const aistudio = (window as any).aistudio;
+          if (aistudio) {
+              await aistudio.openSelectKey();
               setError("Session expired. Please re-select your API key.");
           }
       } else {
