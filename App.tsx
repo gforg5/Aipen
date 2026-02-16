@@ -4,8 +4,8 @@ import { AppState, Book, Chapter, GenerationProgress } from './types.ts';
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-// Locked key to prevent history loss on updates
-const PROJECTS_STORAGE_KEY = 'AIPEN_PRO_MASTER_DB';
+// Permanent storage key
+const PROJECTS_STORAGE_KEY = 'AIPEN_STUDIO_V10_STABLE';
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -200,17 +200,9 @@ const App: React.FC = () => {
     message: ''
   });
 
-  // Safe Persistence Effect
+  // Simplified and robust persistence
   useEffect(() => {
-    if (projects.length > 0) {
-      localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
-    } else {
-      // Only clear if explicitly intended, or handle initial empty state
-      const existing = localStorage.getItem(PROJECTS_STORAGE_KEY);
-      if (existing === null) {
-          localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify([]));
-      }
-    }
+    localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
   }, [projects]);
 
   const ensureApiKey = async () => {
@@ -220,7 +212,6 @@ const App: React.FC = () => {
             const hasKey = await aistudio.hasSelectedApiKey();
             if (!hasKey) {
                 await aistudio.openSelectKey();
-                return true; 
             }
         }
     } catch (e) {
@@ -231,7 +222,7 @@ const App: React.FC = () => {
 
   const startOutline = async () => {
     if (!title) {
-      setError("Provide a book title.");
+      setError("Please provide a title to begin.");
       return;
     }
     setLoading(true);
@@ -244,7 +235,7 @@ const App: React.FC = () => {
       const newBook: Book = {
         id: Math.random().toString(36).substr(2, 9),
         title,
-        author: author || 'Elite Digital Author',
+        author: author || 'SMA',
         genre,
         targetLength: length,
         outline,
@@ -258,15 +249,7 @@ const App: React.FC = () => {
       setStep(AppState.OUTLINING);
     } catch (err: any) {
       console.error(err);
-      if (err.message?.includes("entity was not found")) {
-          const aistudio = (window as any).aistudio;
-          if (aistudio) {
-              await aistudio.openSelectKey();
-              setError("Session expired. Please re-select your API key.");
-          }
-      } else {
-          setError(err.message || "Engine latency detected. Try again in a few seconds.");
-      }
+      setError(err.message || "Engine latency detected. Try again.");
     } finally {
       setLoading(false);
     }
@@ -315,7 +298,7 @@ const App: React.FC = () => {
       setStep(AppState.VIEWER);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Authoring process interrupted. Check quota.");
+      setError(err.message || "Authoring process interrupted.");
     } finally {
       setLoading(false);
     }
@@ -411,7 +394,7 @@ const App: React.FC = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Author Name</label>
-                        <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Your Name"
+                        <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="SMA"
                           className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none transition-all font-bold text-sm" />
                       </div>
                       <div className="space-y-2">
@@ -471,10 +454,8 @@ const App: React.FC = () => {
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {projects.map(project => {
-                      // Safe date parsing to avoid "Invalid Date"
                       const dateObj = new Date(project.createdAt);
-                      const dateStr = isNaN(dateObj.getTime()) ? 'Recent Masterpiece' : dateObj.toLocaleDateString();
-                      
+                      const dateStr = isNaN(dateObj.getTime()) ? 'Recent Blueprint' : dateObj.toLocaleDateString();
                       return (
                         <div key={project.id} onClick={() => loadProject(project)} className="group bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover-card cursor-pointer flex flex-col relative overflow-hidden">
                           <button onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }} className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center z-10">
@@ -584,17 +565,17 @@ const App: React.FC = () => {
 
         {step === AppState.VIEWER && currentBook && (
           <>
-            {/* --- ELITE PRINT RENDER (HIDDEN ON SCREEN) --- */}
+            {/* --- STRICT PRINT RENDER --- */}
             <div className="hidden print:block w-full">
               {/* PAGE 1: EXCLUSIVE COVER */}
               <div className="book-page flex flex-col items-center justify-center text-center">
-                 <div className="text-[18px] font-black tracking-[1.4em] uppercase text-indigo-500 mb-16">Official Book</div>
+                 <div className="text-[18px] font-black tracking-[1.4em] uppercase text-indigo-500 mb-16">OFFICIAL BOOK</div>
                  <h1 className="text-9xl font-black text-slate-900 serif-text leading-tight mb-12 px-12">{currentBook.title}</h1>
                  <div className="w-32 h-1 bg-slate-900/10 mb-12"></div>
                  <div className="text-5xl text-slate-400 italic serif-text font-medium">Writer: {currentBook.author}</div>
               </div>
               
-              {/* PAGE 2+: CONTENT SEGMENTS */}
+              {/* PAGE 2+: SEGMENTS */}
               {currentBook.outline.map((ch, idx) => (
                 <div key={ch.id} className="book-page">
                   <div className="flex justify-between items-center mb-24 border-b border-slate-100 pb-8">
@@ -608,7 +589,7 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            {/* --- PREMIUM SCREEN VIEWER --- */}
+            {/* --- PREMIUM SCREEN VIEW --- */}
             <div className="w-full animate-fade-in-up flex flex-col items-center px-6 no-print">
               <div className="fixed bottom-10 left-1/2 -translate-x-1/2 md:left-20 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-8 z-50 bg-white/80 backdrop-blur-2xl p-4 md:p-0 rounded-[40px] shadow-3xl md:shadow-none border border-slate-200 md:border-none">
                  <button 
@@ -648,7 +629,7 @@ const App: React.FC = () => {
                  <div className="bg-white rounded-[64px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] min-h-screen p-12 md:p-32">
                     {activeChapterIndex === 0 && (
                       <div className="mb-40 text-center border-b border-slate-50 pb-32 space-y-12">
-                         <div className="text-[12px] font-black tracking-[1em] uppercase text-indigo-500">Official Book</div>
+                         <div className="text-[12px] font-black tracking-[1em] uppercase text-indigo-500">OFFICIAL BOOK</div>
                          <h1 className="text-6xl md:text-9xl font-black text-slate-900 serif-text leading-tight tracking-tighter">{currentBook.title}</h1>
                          <div className="text-3xl text-slate-400 italic serif-text font-medium block">Writer: {currentBook.author}</div>
                       </div>
