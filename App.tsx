@@ -4,7 +4,8 @@ import { AppState, Book, Chapter, GenerationProgress } from './types.ts';
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-const PROJECTS_STORAGE_KEY = 'aipen_projects_v10';
+// Locked key to prevent history loss on updates
+const PROJECTS_STORAGE_KEY = 'AIPEN_PRO_MASTER_DB';
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -173,8 +174,13 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
 
 const App: React.FC = () => {
   const [projects, setProjects] = useState<Book[]>(() => {
-    const saved = localStorage.getItem(PROJECTS_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem(PROJECTS_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error("Storage Recovery Failure:", e);
+      return [];
+    }
   });
 
   const [currentBook, setCurrentBook] = useState<Book | null>(null);
@@ -194,8 +200,17 @@ const App: React.FC = () => {
     message: ''
   });
 
+  // Safe Persistence Effect
   useEffect(() => {
-    localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
+    if (projects.length > 0) {
+      localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
+    } else {
+      // Only clear if explicitly intended, or handle initial empty state
+      const existing = localStorage.getItem(PROJECTS_STORAGE_KEY);
+      if (existing === null) {
+          localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify([]));
+      }
+    }
   }, [projects]);
 
   const ensureApiKey = async () => {
@@ -250,7 +265,7 @@ const App: React.FC = () => {
               setError("Session expired. Please re-select your API key.");
           }
       } else {
-          setError(err.message || "Engine latency detected (Outline phase). Try again in a few seconds.");
+          setError(err.message || "Engine latency detected. Try again in a few seconds.");
       }
     } finally {
       setLoading(false);
@@ -300,15 +315,7 @@ const App: React.FC = () => {
       setStep(AppState.VIEWER);
     } catch (err: any) {
       console.error(err);
-      if (err.message?.includes("entity was not found")) {
-          const aistudio = (window as any).aistudio;
-          if (aistudio) {
-              await aistudio.openSelectKey();
-              setError("Session expired. Please re-select your API key.");
-          }
-      } else {
-          setError(err.message || "Authoring process interrupted by quota limit.");
-      }
+      setError(err.message || "Authoring process interrupted. Check quota.");
     } finally {
       setLoading(false);
     }
@@ -464,7 +471,10 @@ const App: React.FC = () => {
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {projects.map(project => {
-                      const date = project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'New Blueprint';
+                      // Safe date parsing to avoid "Invalid Date"
+                      const dateObj = new Date(project.createdAt);
+                      const dateStr = isNaN(dateObj.getTime()) ? 'Recent Masterpiece' : dateObj.toLocaleDateString();
+                      
                       return (
                         <div key={project.id} onClick={() => loadProject(project)} className="group bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover-card cursor-pointer flex flex-col relative overflow-hidden">
                           <button onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }} className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center z-10">
@@ -479,7 +489,7 @@ const App: React.FC = () => {
                                 <div className="flex items-center gap-3 text-[10px] text-slate-400 font-black uppercase tracking-widest">
                                    <span className="text-indigo-500">{project.genre}</span>
                                    <span>•</span>
-                                   <span>{date}</span>
+                                   <span>{dateStr}</span>
                                 </div>
                              </div>
                           </div>
@@ -551,17 +561,18 @@ const App: React.FC = () => {
 
         {step === AppState.WRITING && (
            <div className="py-40 text-center animate-fade-in-up flex flex-col items-center w-full px-6 no-print">
-              <div className="relative mb-16 animate-float">
+              <div className="relative mb-20 animate-float">
                  <div className="w-32 h-32 md:w-48 md:h-48 border-[12px] border-slate-50 border-t-indigo-600 rounded-full animate-spin shadow-2xl"></div>
                  <div className="absolute inset-0 flex items-center justify-center">
                     <i className="fas fa-feather-pointed text-slate-200 text-4xl md:text-6xl animate-pulse"></i>
                  </div>
               </div>
-              <div className="space-y-6">
+              <div className="space-y-8">
                  <h2 className="text-4xl md:text-6xl font-black serif-text text-slate-900 tracking-tight block">
                    Synthesizing Book
                  </h2>
-                 <p className="text-indigo-600 font-black serif-text text-xl animate-fade-in-up block italic tracking-wide">
+                 <div className="h-px w-20 bg-slate-100 mx-auto"></div>
+                 <p className="text-indigo-600 font-bold serif-text text-xl animate-fade-in-up block italic tracking-wide">
                    {progress.message}
                  </p>
                  <div className="w-full max-w-md h-2 bg-slate-50 rounded-full mx-auto overflow-hidden border border-slate-100 shadow-inner mt-8">
@@ -573,22 +584,22 @@ const App: React.FC = () => {
 
         {step === AppState.VIEWER && currentBook && (
           <>
-            {/* --- FULL BOOK PRINT ONLY RENDER --- */}
+            {/* --- ELITE PRINT RENDER (HIDDEN ON SCREEN) --- */}
             <div className="hidden print:block w-full">
-              {/* Cover Page */}
+              {/* PAGE 1: EXCLUSIVE COVER */}
               <div className="book-page flex flex-col items-center justify-center text-center">
-                 <div className="text-[16px] font-black tracking-[1.2em] uppercase text-indigo-500 mb-12">Official Book</div>
-                 <h1 className="text-8xl font-black text-slate-900 serif-text leading-tight mb-8 px-12">{currentBook.title}</h1>
-                 <div className="w-24 h-1 bg-slate-200 mb-8"></div>
-                 <div className="text-4xl text-slate-400 italic serif-text font-medium">Writer: {currentBook.author}</div>
+                 <div className="text-[18px] font-black tracking-[1.4em] uppercase text-indigo-500 mb-16">Official Book</div>
+                 <h1 className="text-9xl font-black text-slate-900 serif-text leading-tight mb-12 px-12">{currentBook.title}</h1>
+                 <div className="w-32 h-1 bg-slate-900/10 mb-12"></div>
+                 <div className="text-5xl text-slate-400 italic serif-text font-medium">Writer: {currentBook.author}</div>
               </div>
               
-              {/* Chapters */}
+              {/* PAGE 2+: CONTENT SEGMENTS */}
               {currentBook.outline.map((ch, idx) => (
                 <div key={ch.id} className="book-page">
-                  <div className="flex justify-between items-center mb-20 border-b border-slate-100 pb-6">
+                  <div className="flex justify-between items-center mb-24 border-b border-slate-100 pb-8">
                     <h2 className="text-4xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {idx + 1}</h2>
-                    <div className="text-[12px] font-black text-slate-300 uppercase tracking-widest italic">Draft v1.2</div>
+                    <div className="text-[12px] font-black text-slate-300 uppercase tracking-widest italic">AiPen Studio v8.0</div>
                   </div>
                   <div className="prose-book">
                      <div dangerouslySetInnerHTML={{ __html: marked.parse(ch.content || '') as string }} />
@@ -597,7 +608,7 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            {/* --- SCREEN VIEWER --- */}
+            {/* --- PREMIUM SCREEN VIEWER --- */}
             <div className="w-full animate-fade-in-up flex flex-col items-center px-6 no-print">
               <div className="fixed bottom-10 left-1/2 -translate-x-1/2 md:left-20 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-8 z-50 bg-white/80 backdrop-blur-2xl p-4 md:p-0 rounded-[40px] shadow-3xl md:shadow-none border border-slate-200 md:border-none">
                  <button 
@@ -645,7 +656,7 @@ const App: React.FC = () => {
                     
                     <div className="flex justify-between items-center mb-16 border-b border-slate-50 pb-8">
                        <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {activeChapterIndex + 1}</h2>
-                       <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Architect Draft v1.2</div>
+                       <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">Draft v1.2</div>
                     </div>
                     
                     <div className="prose-book">
