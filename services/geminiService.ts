@@ -4,16 +4,20 @@ import { Chapter } from "../types.ts";
 
 export const geminiService = {
   async generateOutline(title: string, genre: string, length: number): Promise<Chapter[]> {
-    // Initialize inside the method to ensure process.env.API_KEY is available
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const chapterCount = Math.max(5, Math.min(30, Math.ceil(length / 10)));
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) throw new Error("API_KEY_NOT_FOUND");
+    
+    const ai = new GoogleGenAI({ apiKey });
+    // Adjust chapter count based on target page length to simulate a larger book structure
+    const chapterCount = Math.max(8, Math.min(40, Math.ceil(length / 8)));
     
     try {
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `Generate a detailed professional book outline for a ${genre} book titled "${title}". 
-        Target total book length: ${length} pages. Provide exactly ${chapterCount} chapters. 
-        For each chapter, provide a title and 3-5 distinct subsections. Return raw JSON array only.`,
+        contents: `Architect a comprehensive, high-fidelity book outline for a ${genre} masterpiece titled "${title}". 
+        The target book length is ${length} pages. Create a professional structure with exactly ${chapterCount} chapters. 
+        Each chapter must have a compelling title and 4-6 detailed subsections covering key themes and narrative arcs. 
+        Return strictly raw JSON array matching the schema.`,
         config: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -34,7 +38,7 @@ export const geminiService = {
       });
 
       const text = response.text;
-      if (!text) throw new Error("Neural blueprint returned empty.");
+      if (!text) throw new Error("Neural core returned empty blueprint.");
       
       const data = JSON.parse(text);
       return data.map((item: any, index: number) => ({
@@ -44,37 +48,44 @@ export const geminiService = {
         status: 'pending'
       }));
     } catch (e: any) {
-      console.error("Outline Generation Failure:", e);
-      throw new Error(`Engine Error: ${e.message || "Unknown error"}`);
+      console.error("Outline Generation Error:", e);
+      throw new Error(e.message || "Failed to generate book architecture.");
     }
   },
 
   async generateChapterContent(bookTitle: string, genre: string, chapter: Chapter): Promise<string> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) throw new Error("API_KEY_NOT_FOUND");
+    
+    const ai = new GoogleGenAI({ apiKey });
     
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `You are a world-class professional author. Write high-fidelity, comprehensive content for Chapter: "${chapter.title}" 
-      of the book "${bookTitle}" (Genre: ${genre}). 
-      Discuss topics: ${chapter.subsections.join(', ')}. 
+      model: 'gemini-3-pro-preview', // Using Pro for deeper reasoning and high-fidelity prose
+      contents: `You are a world-renowned professional author. Write an exhaustive, elite chapter for the book "${bookTitle}" (Genre: ${genre}). 
+      Chapter Title: "${chapter.title}".
+      Key Sub-topics to integrate: ${chapter.subsections.join(', ')}. 
       
-      RULES:
-      1. Use a rich, elite literary style.
-      2. Insert [VISUAL: Description of illustration] placeholders where visual context adds value.
-      3. Write a deep, detailed segment (at least 1500 words) with multiple paragraphs and sub-headings.
-      4. Professional markdown formatting (use ## for subheadings).
-      5. DO NOT repeat the chapter title at the start. Just start with the prose.`,
+      LITERARY DIRECTIVES:
+      1. Employ a sophisticated, immersive writing style with rich vocabulary.
+      2. Aim for extreme depth and detail (minimum 2000 words for this segment).
+      3. Use professional markdown formatting (## for subheadings, *italic* for emphasis).
+      4. Place [VISUAL: Vivid description of a cinematic illustration] where it enhances the narrative.
+      5. Ensure seamless transitions between concepts.
+      6. Start directly with the prose. Do not repeat the chapter title.`,
       config: {
-         thinkingConfig: { thinkingBudget: 16000 }
+         thinkingConfig: { thinkingBudget: 32000 }
       }
     });
 
-    return response.text || "Neural core failed to materialize content.";
+    return response.text || "Neural core failed to synthesize content.";
   },
 
   async generateChapterImage(desc: string, genre: string): Promise<string> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = `A professional, highly aesthetic book illustration for a ${genre} book. Subject: ${desc}. Elite visual quality, no text, cinematic lighting.`;
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) throw new Error("API_KEY_NOT_FOUND");
+    
+    const ai = new GoogleGenAI({ apiKey });
+    const prompt = `Professional high-end book illustration for a ${genre} volume. Scene: ${desc}. Cinematic lighting, artistic mastery, ultra-detailed, 8k resolution, no text.`;
     
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
@@ -89,12 +100,15 @@ export const geminiService = {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
     }
-    throw new Error("Visual materialization failed.");
+    throw new Error("Visual synthesis failed.");
   },
 
   async generateCovers(title: string, genre: string): Promise<string[]> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = `A premium high-fidelity book cover for "${title}". Genre: ${genre}. Highly artistic, Amazon KDP ready, minimal text.`;
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) throw new Error("API_KEY_NOT_FOUND");
+    
+    const ai = new GoogleGenAI({ apiKey });
+    const prompt = `Premium minimalist book cover art for "${title}". Genre: ${genre}. Award-winning design, evocative imagery, Amazon KDP standard, no text on art.`;
     
     try {
       const response = await ai.models.generateContent({
@@ -111,7 +125,7 @@ export const geminiService = {
         }
       }
     } catch (e) {
-      console.warn("Cover gen latency:", e);
+      console.warn("Cover generation failed or timed out:", e);
     }
     return [];
   }
