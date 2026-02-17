@@ -212,11 +212,21 @@ const App: React.FC = () => {
       const hasKey = await aistudio.hasSelectedApiKey();
       if (!hasKey) {
         await aistudio.openSelectKey();
-        // As per instructions, assume success after triggering the openSelectKey call.
         return true; 
       }
     }
     return true;
+  };
+
+  const handleApiError = async (err: any) => {
+    const errorMessage = err.message || "";
+    if (errorMessage.includes("Requested entity was not found")) {
+      setError("API Key verification required. Please select a valid key.");
+      const aistudio = (window as any).aistudio;
+      if (aistudio) await aistudio.openSelectKey();
+    } else {
+      setError(`Operation Interrupted: ${errorMessage}`);
+    }
   };
 
   const startOutline = async () => {
@@ -228,10 +238,8 @@ const App: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    // Ensure key is selected before continuing
     const keySelected = await ensureApiKey();
     if (!keySelected) {
-       // Should not happen based on instructions, but good for safety
        setLoading(false);
        return;
     }
@@ -254,7 +262,7 @@ const App: React.FC = () => {
       setProjects(prev => [newBook, ...prev]);
       setStep(AppState.OUTLINING);
     } catch (err: any) {
-      setError(err.message || "Architecture process failed. Please ensure your API key is active.");
+      await handleApiError(err);
       console.error(err);
     } finally {
       setLoading(false);
@@ -295,6 +303,7 @@ const App: React.FC = () => {
         });
       }
       
+      setProgress(p => ({ ...p, message: 'Generating cinematic covers...' }));
       const covers = await geminiService.generateCovers(currentBook.title, currentBook.genre);
       const finalBook = { ...currentBook, outline: [...updatedOutline], covers };
       setCurrentBook(finalBook);
@@ -304,7 +313,8 @@ const App: React.FC = () => {
       });
       setStep(AppState.VIEWER);
     } catch (err: any) {
-      setError("Authoring process interrupted. Check connection and retry.");
+      await handleApiError(err);
+      setStep(AppState.OUTLINING); // Return to outline if writing fails
     } finally {
       setLoading(false);
     }
@@ -517,21 +527,18 @@ const App: React.FC = () => {
 
         {step === AppState.VIEWER && currentBook && (
           <>
-            {/* --- STRICT PRINT VIEW --- */}
             <div className="hidden print:block w-full">
-              {/* PAGE 1: COVER PAGE EXCLUSIVE */}
               <div className="book-page flex flex-col items-center justify-center text-center" style={{ breakAfter: 'page' }}>
                  <div className="text-[20px] font-black tracking-[1.6em] uppercase text-slate-900 mb-20 opacity-90">O F F I C I A L  B O O K</div>
-                 <h1 className="text-9xl font-black text-slate-900 serif-text leading-tight mb-8">AgenticAi</h1>
+                 <h1 className="text-9xl font-black text-slate-900 serif-text leading-tight mb-8">{currentBook.title}</h1>
                  <div className="w-32 h-1 bg-slate-900/10 mb-12 rounded-full"></div>
                  <div className="text-4xl text-slate-600 italic serif-text font-medium">Writer: {currentBook.author}</div>
               </div>
               
-              {/* PAGE 2+: MANUSCRIPT SEGMENTS */}
               {currentBook.outline.map((ch, idx) => (
                 <div key={ch.id} className="book-page">
                   <div className="flex justify-between items-center mb-20 border-b border-slate-100 pb-8">
-                    <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {idx + 1}</h2>
+                    <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {idx + 1}: {ch.title}</h2>
                     <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">AiPen Studio v10.5</div>
                   </div>
                   <div className="prose-book">
@@ -541,7 +548,6 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            {/* --- PREMIUM SCREEN VIEW --- */}
             <div className="w-full animate-fade-in-up flex flex-col items-center px-6 no-print">
               <div className="fixed bottom-10 left-1/2 -translate-x-1/2 md:left-20 md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-8 z-50 bg-white/80 backdrop-blur-2xl p-4 rounded-[40px] shadow-3xl border border-white/20">
                  <button 
@@ -582,13 +588,13 @@ const App: React.FC = () => {
                     {activeChapterIndex === 0 && (
                       <div className="mb-40 text-center border-b border-slate-50 pb-32 space-y-12 animate-fade-in-up">
                          <div className="text-[16px] font-black tracking-[1.4em] uppercase text-slate-900 mb-20">O F F I C I A L  B O O K</div>
-                         <h1 className="text-7xl md:text-9xl font-black text-slate-900 serif-text leading-tight tracking-tighter mb-4">AgenticAi</h1>
+                         <h1 className="text-7xl md:text-9xl font-black text-slate-900 serif-text leading-tight tracking-tighter mb-4">{currentBook.title}</h1>
                          <div className="text-3xl text-slate-400 italic serif-text font-medium block">Writer: {currentBook.author}</div>
                       </div>
                     )}
                     
                     <div className="flex justify-between items-center mb-16 border-b border-slate-50 pb-8">
-                       <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {activeChapterIndex + 1}</h2>
+                       <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {activeChapterIndex + 1}: {currentBook.outline[activeChapterIndex].title}</h2>
                        <div className="text-[11px] font-black text-slate-300 uppercase italic">Architect Draft v10.5</div>
                     </div>
                     
