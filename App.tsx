@@ -4,7 +4,7 @@ import { AppState, Book, Chapter, GenerationProgress } from './types.ts';
 import { geminiService } from './services/geminiService.ts';
 import { marked } from 'marked';
 
-const PROJECTS_STORAGE_KEY = 'AIPEN_PRO_STORAGE_FINAL_V2';
+const PROJECTS_STORAGE_KEY = 'AIPEN_PRO_STORAGE_V3';
 
 const Header: React.FC<{ 
   setStep: (s: AppState) => void; 
@@ -142,7 +142,7 @@ const VisualPlaceholder: React.FC<{desc: string, genre: string, onReplace: (desc
           const imgB64 = await geminiService.generateChapterImage(desc, genre);
           onReplace(desc, imgB64);
       } catch (e: any) {
-          setError(e.message || "Materialization failed.");
+          setError(e.message || "Visual synthesis failed.");
           setLoading(false);
       }
   }
@@ -195,15 +195,11 @@ const App: React.FC = () => {
     message: ''
   });
 
-  const isInitialMount = useRef(true);
-
   // Robust Persistence
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+    if (projects.length > 0) {
+      localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
     }
-    localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
   }, [projects]);
 
   const ensureApiKey = async () => {
@@ -220,13 +216,16 @@ const App: React.FC = () => {
 
   const handleApiError = async (err: any) => {
     const errorMessage = err.message || "";
-    if (errorMessage.includes("Requested entity was not found")) {
-      setError("API Key verification required. Please select a valid key.");
+    if (errorMessage.includes("Requested entity was not found") || errorMessage.includes("quota") || errorMessage.includes("429")) {
+      setError("AI Engine Overloaded or Key Reset Required. Please ensure you have selected a valid Billing Key.");
       const aistudio = (window as any).aistudio;
-      if (aistudio) await aistudio.openSelectKey();
+      if (aistudio) {
+        await aistudio.openSelectKey();
+      }
     } else {
       setError(`Operation Interrupted: ${errorMessage}`);
     }
+    setLoading(false);
   };
 
   const startOutline = async () => {
@@ -238,11 +237,7 @@ const App: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    const keySelected = await ensureApiKey();
-    if (!keySelected) {
-       setLoading(false);
-       return;
-    }
+    await ensureApiKey();
 
     try {
       const outline = await geminiService.generateOutline(title, genre, length);
@@ -259,11 +254,9 @@ const App: React.FC = () => {
       };
       
       setCurrentBook(newBook);
-      setProjects(prev => [newBook, ...prev]);
       setStep(AppState.OUTLINING);
     } catch (err: any) {
       await handleApiError(err);
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -275,8 +268,7 @@ const App: React.FC = () => {
     setLoading(true);
     setError(null);
     
-    const keyOk = await ensureApiKey();
-    if (!keyOk) return;
+    await ensureApiKey();
 
     const updatedOutline = [...currentBook.outline];
     setProgress({ currentChapter: 0, totalChapters: updatedOutline.length, message: 'Priming authorial cores...' });
@@ -297,15 +289,12 @@ const App: React.FC = () => {
         
         const partialBook = { ...currentBook, outline: [...updatedOutline] };
         setCurrentBook(partialBook);
-        setProjects(prev => {
-           const filtered = prev.filter(p => p.id !== partialBook.id);
-           return [partialBook, ...filtered];
-        });
       }
       
-      setProgress(p => ({ ...p, message: 'Generating cinematic covers...' }));
+      setProgress(p => ({ ...p, message: 'Synthesizing cinematic covers...' }));
       const covers = await geminiService.generateCovers(currentBook.title, currentBook.genre);
       const finalBook = { ...currentBook, outline: [...updatedOutline], covers };
+      
       setCurrentBook(finalBook);
       setProjects(prev => {
          const filtered = prev.filter(p => p.id !== finalBook.id);
@@ -314,7 +303,7 @@ const App: React.FC = () => {
       setStep(AppState.VIEWER);
     } catch (err: any) {
       await handleApiError(err);
-      setStep(AppState.OUTLINING); // Return to outline if writing fails
+      setStep(AppState.OUTLINING);
     } finally {
       setLoading(false);
     }
@@ -384,25 +373,21 @@ const App: React.FC = () => {
               <div className="grid lg:grid-cols-12 gap-12 items-center">
                 <div className="lg:col-span-7 space-y-10">
                   <div className="space-y-6">
-                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full animate-float">
+                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full">
                       <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
-                      <div className="text-perspective-container">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 animate-text-float text-3d-hover">v10.5 High-Fidelity Studio</span>
-                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">v11.0 High-Fidelity Studio</span>
                     </div>
-                    <div className="text-perspective-container block w-full">
-                      <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 serif-text tracking-tighter leading-none animate-reveal-skew text-3d-hover">
-                        <span className="animate-wobble-killer">Architect</span> <br/>
-                        <span className="text-indigo-600 italic animate-text-float">Masterpieces.</span>
-                      </h2>
-                    </div>
+                    <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 serif-text tracking-tighter leading-none">
+                      Architect <br/>
+                      <span className="text-indigo-600 italic">Masterpieces.</span>
+                    </h2>
                   </div>
 
                   <div className="bg-white p-8 md:p-10 rounded-[40px] border border-slate-100 shadow-2xl space-y-8">
                     <div className="grid sm:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Book Title</label>
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="AgenticAi"
+                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Agentic Intelligence"
                           className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none font-black serif-text text-xl transition-all" />
                       </div>
                       <div className="space-y-2">
@@ -411,7 +396,7 @@ const App: React.FC = () => {
                           className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:bg-white outline-none font-bold text-sm transition-all" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Target Volume (Pages)</label>
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2">Volume (50-500 Pages)</label>
                         <input type="number" min="50" max="500" value={length} onChange={(e) => setLength(Number(e.target.value))}
                           className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 font-bold text-sm outline-none transition-all" />
                       </div>
@@ -539,7 +524,7 @@ const App: React.FC = () => {
                 <div key={ch.id} className="book-page">
                   <div className="flex justify-between items-center mb-20 border-b border-slate-100 pb-8">
                     <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {idx + 1}: {ch.title}</h2>
-                    <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">AiPen Studio v10.5</div>
+                    <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">AiPen Studio v11.0</div>
                   </div>
                   <div className="prose-book">
                      <div dangerouslySetInnerHTML={{ __html: marked.parse(ch.content || '') as string }} />
@@ -595,7 +580,7 @@ const App: React.FC = () => {
                     
                     <div className="flex justify-between items-center mb-16 border-b border-slate-50 pb-8">
                        <h2 className="text-3xl font-black text-indigo-600 serif-text tracking-tight uppercase m-0">Segment {activeChapterIndex + 1}: {currentBook.outline[activeChapterIndex].title}</h2>
-                       <div className="text-[11px] font-black text-slate-300 uppercase italic">Architect Draft v10.5</div>
+                       <div className="text-[11px] font-black text-slate-300 uppercase italic">Architect Draft v11.0</div>
                     </div>
                     
                     <div className="prose-book animate-fade-in-up">
